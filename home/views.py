@@ -334,9 +334,9 @@ def handle_text(request):
     OccupationLine = f"{Name}'s occupation: {Occupation}\n" if Occupation else ""
     InterestsLine = f"{Name}'s interests: {Interests}\n. These are what the user ({Name}) is interested to." if Interests else ""
     if is_rp:
-        systemInstructions = (f"{AI_Prompt}\n"+str(open("home/prompts/rp_system_prompt.txt", "r").read()))
+        systemInstructions = (f"{AI_Prompt}\n"+str(open(".env/prompts/rp_system_prompt.txt", "r").read()))
     else:
-        systemInstructions = ("[IMPORTANT GUIDELINES]\n"+open("home/prompts/nonrp_system_prompt.txt", "r").read()+
+        systemInstructions = ("[IMPORTANT GUIDELINES]\n"+open(".env/prompts/nonrp_system_prompt.txt", "r").read()+
                               f"\nYOUR NAME: Amelia\n"
                               f"[USER INFORMATION]\n"
                                   f"User's name:{Name}. Always call user {Name} unless they ask otherwise.\n"
