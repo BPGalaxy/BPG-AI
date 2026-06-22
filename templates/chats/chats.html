@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load home_tags %}
+{% block header_title %}
+    <div class="header-title">Chats</div>
+{% endblock %}
+
+{% block style %}
+    {% include 'static/css/forms.style.css' %}
+{% endblock %}
+
+{% block topscript %}
+    {% include 'static/js/theme-switcher.js' %}
+{% endblock %}
+
+    {% block content %}
+        {% if checkDeleted %}
+            <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 85vh;">
+                <h3 class="header-title">You don't have any chats yet</h3>
+                <input type="submit" value="Make One" onclick="window.location.href='/new_chat/';">
+            </div>
+        {% else %}
+            {% for chat in userchats %}
+                {% if not chat.is_deleted %}    
+                    <form action="{% url 'chats' %}" method="get">
+                        <input type="hidden" name="chat_id" id="chat_id_value" value="{{ chat.chatid }}">
+                        <button class="chat-item">
+                            {% with character=chat_characters|get_item:chat.id %}
+                              {% if character and character.ProfilePicture %}
+                                  <img class="avatar " style="object-fit:cover;" src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="profile-picture">
+                              {% else %}
+                                <div class="avatar">{{chat.avatar}}</div>
+                              {% endif %}
+                            {% endwith %}
+                          <div class="contact-info">
+                            <div class="name">{{chat.chatname}}</div>
+                            <div class="last-message">{{chat.last_message}}</div>
+                          </div>
+                        </button>
+                    </form>
+                    <div class="dropdown-divider"></div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endblock %}
+

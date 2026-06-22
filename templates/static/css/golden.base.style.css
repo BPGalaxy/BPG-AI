@@ -1,0 +1,758 @@
+:root {
+  /* ── Gold Theme — Brightest → Darkest ───────────────────── */
+    --chat-item-bg: #150e00;
+    --chat-item-hover: #1c1300;
+    --avatar-bg-color: #402d00;
+    --avatar-color: #e6b830;
+  /* Whites & Very Light Golds */
+  --clr-text-light:        #fff8e7;                      /* warm off-white     */
+  --clr-lavender-lightest: #ffe066;                      /* light gold         */
+  --clr-green-light:       #fff0b3;                      /* pale gold tint     */
+  --clr-lavender-lighter:  #f5e6b0;                      /* muted warm gold    */
+  --clr-lavender-light:    #f5c842;                      /* bright gold ★      */
+  --clr-lavender-header:   #e6b830;                      /* deep bright gold   */
+  --clr-green-text:        #b1e6b1;                      /* green (unchanged)  */
+  --clr-danger-light:      #ffb8b8;                      /* danger (unchanged) */
+
+  /* Semi-transparent */
+  --clr-icon-muted:        rgba(245, 200, 66, 0.55);     /* muted gold icon    */
+
+  /* Mids */
+  --clr-purple-muted:      #c89000;                      /* mid gold           */
+  --clr-purple-glow:       #f5c842;                      /* gold glow          */
+  --clr-purple-btn:        #a57700;                      /* gold button        */
+  --clr-purple-border-dark:#8a6200;                      /* dark gold border   */
+  --clr-purple-hover:      #a07800;                      /* hover gold         */
+  --clr-green-dark:        #2e522e;                      /* green (unchanged)  */
+  --clr-red-dark:          #7a1d34;                      /* red (unchanged)    */
+
+  /* Dark Golds */
+  --clr-purple-bar-border: #8a6200;                      /* dark gold border   */
+  --clr-purple-bar-border-glow: #c89000aa;               /* gold glow w/alpha  */
+  --clr-purple-divider:    #6b4a00;                      /* dark gold divider  */
+  --clr-red-icon:          #6a1522;                      /* red icon (unchanged)*/
+  --clr-purple-deep:       #3d2800;                      /* very dark gold-brown*/
+  --clr-purple-darker:     #2a1c00;                      /* darkest gold tint  */
+
+  /* Semi-transparent Darks */
+  --clr-white-alpha-12:    rgba(255, 255, 255, 0.12);
+  --clr-input-shadow:      rgba(0, 0, 0, 0.38);          /* from #00000060     */
+
+  /* Darkest Backgrounds */
+  --clr-purple-input-bg:   #1a1200;
+  --clr-purple-ai-bg:      #1c1400;
+  --clr-drawer-bg:         #161000;
+  --clr-white-alpha-08:    rgba(255, 255, 255, 0.08);
+  --clr-header-bg:         rgba(26, 18, 0, 0.80);
+  --clr-body-bg:           #0f0a00;
+  --clr-bar-bg:            rgba(15, 10, 0, 0.70);
+  --clr-input-area-bg:     rgba(26, 18, 0, 0);           /* transparent        */
+  --clr-black:             black;
+}
+
+
+body {
+            margin: 0;
+            font-family: Nunito;
+            background: var(--clr-body-bg);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            color: var(--clr-text-light);
+        }
+
+        * {
+          -webkit-tap-highlight-color: transparent;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide{
+            display: none;
+        }
+
+        header {
+          font-family: Arial, sans-serif;
+          position: fixed;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100%;
+          max-width: 650px;
+          box-sizing: border-box;
+          text-align:center;
+
+          /* Glassy background */
+          background: var(--clr-header-bg);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+
+          padding: 18px 24px;
+          font-size: 22px;
+          font-weight: bold;
+          color: var(--clr-lavender-header);
+          box-shadow: 0 0px 20px var(--clr-purple-bar-border-glow),
+            inset 0 1px 0 var(--clr-input-shadow);
+          border-bottom: 1px solid var(--clr-purple-bar-border);
+          border-bottom-left-radius: 25px;
+          border-bottom-right-radius: 25px;
+        }
+
+        .parent-container{
+            width:100%;
+            max-width:650px;
+            min-height: 100vh;
+            height:100%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+              box-shadow:
+                0 0 5px var(--clr-purple-darker),      /* Tight inner glow */
+                0 0 10px var(--clr-purple-darker),     /* Medium glow */
+                0 0 20px var(--clr-purple-darker),     /* Wider, deeper purple glow */
+                0 0 30px var(--clr-purple-darker),     /* Even wider glow */
+                0 0 40px var(--clr-purple-darker);
+        }
+
+        p, h3{
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            margin:2px;
+        }
+
+        /* نوار بالا: عنوان + دکمه‌ها */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--clr-lavender-header);
+        }
+
+        /* کانتینر دکمه‌های بالا سمت راست */
+        .header-buttons {
+            display: flex;
+            align-items: center;
+              justify-content: flex-end;
+
+        }
+
+        .profile-wrapper{
+        }
+        /* دکمه آیکون عمومی (پروفایل و تنظیمات) */
+        .icon-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            border: 1px solid var(--clr-purple-border-dark);
+            background: var(--clr-body-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--clr-lavender-light);
+            cursor: pointer;
+            position: relative;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--clr-purple-deep);
+            box-shadow: 0 0 8px rgba(120, 70, 220, 0.6);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* آیکون آدمک با CSS ساده */
+        .icon-user::before {
+            content: "";
+            display: block;
+            width: 12px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--clr-lavender-light);
+            margin-bottom:10px;
+        }
+        .icon-user::after {
+            content: "";
+            display: block;
+            width: 18px;
+            height: 8px;
+            border-radius: 10px 10px 4px 4px;
+            background: var(--clr-lavender-light);
+        }
+
+        /* آیکون تنظیمات (دنده) ساده */
+        .icon-settings {
+            position: relative;
+        }
+        .icon-settings::before {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 2px solid var(--clr-lavender-light);
+            box-sizing: border-box;
+            display: block;
+
+        }
+        .icon-settings::after {
+            content: "";
+            position: absolute;
+            inset: 8px;
+            width: 6px;
+            height: 6px;
+            margin: auto;
+            border-radius: 50%;
+            background: var(--clr-lavender-light);
+        }
+
+        .dropdown-menu {
+            font-family: Arial, sans-serif;
+            position: absolute;
+            transition: opacity 0.3s ease, visibility 0.3s ease; /* Added transition for visibility */
+            top: 110%;
+            width: 150px;
+            background: var(--clr-body-bg);
+            border-radius: 10px;
+            box-shadow: 0 0 8px var(--clr-purple-bar-border);
+            border: 1px solid var(--clr-purple-bar-border);
+            padding: 8px 0;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            text-align: center;
+            align-items: center;
+        }
+
+        .dropdown-menu.open{
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .dropdown-item.danger {
+            color: var(--clr-danger-light);
+        }
+        .dropdown-item.danger:hover {
+            background: var(--clr-red-dark);
+            color: var(--clr-lavender-lightest);
+        }
+
+        .green {
+            background: var(--clr-green-dark);
+            color: var(--clr-green-text);
+        }
+        .green:hover {
+            background: var(--clr-green-dark);
+            color: var(--clr-green-light);
+        }
+
+        .dropdown-item {
+            font-family: Arial, sans-serif;
+            width: 97%;
+            margin: 0 auto;
+            display: block;
+            padding: 9px 14px;
+            font-size: 14px;
+            color: var(--clr-lavender-light);
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .chat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: 1px;
+        }
+
+        .chat-name-btn {
+            background: none;
+            border: none;
+            color: var(--clr-lavender-light);
+            font-size: 14px;
+            padding: 3px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+                background: var(--clr-purple-hover);
+        }
+        .dropdown-item:hover .rename-btn {
+            opacity: 1;
+        }
+
+        .dropdownTitle{
+            font-family: Arial, sans-serif;
+            width: 100%;
+            display: block;
+            padding: 9px 14px;
+            font-size: 14px;
+            color: var(--clr-lavender-light);
+            text-align: left;
+            border: none;
+            border-radius: 10px;
+            align-items: left;
+            gap: 8px;
+            margin-left: -12px;
+        }
+        .dropdown-divider {
+            border-top: 1px solid var(--clr-purple-divider);
+        }
+
+        .dropdown-caption {
+            padding: 6px 14px 4px;
+            font-size: 12px;
+            color: var(--clr-purple-muted);
+            text-align: center;
+        }
+
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+
+            overflow-y: auto;
+            height: auto;
+        }
+
+        .drawer {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: 300px;
+          background: var(--clr-drawer-bg);
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+          z-index: 999;
+          display: flex;
+        }
+
+        .drawer.open {
+          transform: translateX(0);
+                      box-shadow:
+                0 0 5px var(--clr-purple-darker),      /* Tight inner glow */
+                0 0 10px var(--clr-purple-darker),     /* Medium glow */
+                0 0 20px var(--clr-purple-darker),     /* Wider, deeper purple glow */
+                0 0 30px var(--clr-purple-darker),     /* Even wider glow */
+                0 0 40px var(--clr-purple-darker);
+        }
+
+        .drawer-content {
+          padding: 16px;
+          width: 100%;
+        }
+
+        .close-btn {
+          margin-bottom: 12px;
+        }
+
+        .message {
+            display: inline-block;
+            max-width: 70%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            line-height: 1.4;
+            font-size: 15px;
+        }
+
+        .user {
+            background: var(--clr-purple-btn);
+            color: var(--clr-lavender-light);
+            border-bottom-right-radius: 0;
+            border: 1px solid var(--clr-purple-btn);
+            box-shadow: 0 0 8px var(--clr-purple-glow);
+        }
+
+        .ai {
+            background: var(--clr-purple-ai-bg);
+            color: var(--clr-lavender-light);
+            border-bottom-left-radius: 0;
+            border: 1px solid var(--clr-purple-ai-bg);
+            box-shadow: 0 0 8px var(--clr-purple-ai-bg);
+        }
+
+        .msg-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top:-10px;
+            border: 1px solid var(--clr-purple-divider);
+        }
+
+        .options-btn{
+            color: var(--clr-lavender-light);
+            padding: 6px 10px;
+            background: transparent;
+            border: none;
+            margin-top: -10px;
+            cursor: pointer;
+        }
+        .input-area {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 650px;
+            padding: 10px;
+            background: var(--clr-input-area-bg);
+            box-sizing: border-box;
+            display: flex;
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            z-index:9999;
+        }
+
+        .input-container{
+            flex: 1;
+            padding: 10px;
+            background: var(--clr-bar-bg);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            color: var(--clr-lavender-lighter);
+            font-size: 15px;
+            resize: none;
+            min-height: 45px;
+            max-height: 300px;
+            box-sizing: border-box;
+            outline: none;
+            border: 1px solid var(--clr-purple-bar-border);
+            border-radius: 40px;
+            justify-items:center;
+            align-items-center;
+            box-shadow: 0 0px 20px var(--clr-purple-bar-border-glow),
+            inset 0 1px 0 var(--clr-input-shadow);
+        }
+
+        .input-area button, .yesnobtn {
+            background: var(--clr-lavender-lighter);
+            color: var(--clr-drawer-bg);
+            resize: none;
+            border-radius: 20px;
+            padding: 5px;
+            margin: 0 auto;
+            width: 39px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .textareaInput {
+            resize: none;
+            min-height: 40px;
+            box-sizing: border-box;
+            flex: 1;
+            width:10%;
+            height:auto;
+            background: none;
+            color: var(--clr-lavender-lighter);
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+            max-height:250px;
+            line-height: 1.4;
+            outline: none;
+            margin-bottom:-8px;
+            border:none;
+        }
+
+        @media (min-width: 392px) {
+          .input-area textarea {
+            width: 81%;
+          }
+        }
+        @media (min-width: 440px) {
+          .input-area textarea {
+            width: 81.8%;
+          }
+        }
+        @media (min-width: 470px) {
+          .input-area textarea {
+            width: 82.6%;
+          }
+        }
+        @media (min-width: 500px) {
+          .input-area textarea {
+            width: 85.5%;
+          }
+        }
+
+        @media (min-width: 541px) {
+          .input-area textarea {
+            width: 87%;
+          }
+        }
+
+        @media (min-width: 591px) {
+          .input-area textarea {
+            width: 88%;
+          }
+        }
+        @media (min-width: 631px) {
+          .input-area textarea {
+            width: 88.5%;
+          }
+        }
+        @media (min-width: 661px) {
+          .input-area textarea {
+            width: 89%;
+          }
+        }
+        .input-area textarea.auto-expand {
+            flex: 1;
+            padding: 12px 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: var(--clr-purple-input-bg);
+            color: var(--clr-lavender-lighter);
+            font-size: 15px;
+            resize: none;
+            overflow: hidden;
+            min-height: 45px;
+            max-height: 200px;
+        }
+
+        ::-webkit-scrollbar{
+            background-color: var(--clr-drawer-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            margin: 2px;
+            background-color: var(--clr-purple-darker);
+            border-radius: 15px;
+        }
+        .loader {
+          display: flex;
+          justify-content: left;
+          align-items: left;
+          margin-top:10px;
+          max-width:65px;
+          padding:17px;
+        }
+
+        .dot {
+          width: 10px;
+          height: 10px;
+          margin: 0 5px;
+          background-color: var(--clr-black); /* You can change this color */
+          border-radius: 50%;
+          animation: jump 1s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) {
+          animation-delay: -0.32s;
+        }
+
+        .dot:nth-child(2) {
+          animation-delay: -0.16s;
+        }
+
+        @keyframes jump {
+          0%, 80%, 100% {
+            transform: scale(0);
+            background-color: var(--clr-black); /* You can change this color */
+          }
+          40% {
+            transform: scale(1);
+            background-color: var(--clr-purple-btn); /* You can change this color */
+          }
+        }
+
+        .delete_container{
+            cursor: pointer;
+            padding:5px;
+        }
+        .headholder{
+            width:2px;
+            height:2px;
+            margin-left:5px;
+            background: var(--clr-red-icon);
+            margin-top:2px;
+        }
+        .headd{
+            width:12px;
+            height:2px;
+            background: var(--clr-red-icon);
+        }
+        .bodyd{
+            width:10px;
+            height:10px;
+            background: var(--clr-red-icon);
+            margin-left:1px;
+        }
+
+        
+
+    /* The rounded pill bar */
+    .bottom-bar{
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      width: auto;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bar-bg);
+      border: 1px solid var(--bar-border);
+      border-radius: 999px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow:
+        0 0px 20px var(--clr-purple-bar-border-glow),
+        inset 0 1px 0 var(--clr-input-shadow);
+      z-index: 9999;
+    }
+
+    .bottom-bar-btn{
+      all: unset;                 /* removes default button styling */
+      cursor: pointer;
+      width: 56px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      color: var(--icon-muted);
+      transition: transform .15s ease, color .15s ease, background .15s ease;
+      border-radius: 999px;
+    }
+
+    .bottom-bar button:hover{
+      color: var(--icon);
+      transform: translateY(-1px);
+    }
+
+    .bottom-bar button:active{
+      transform: translateY(0px) scale(0.98);
+    }
+
+    /* Icon size */
+    .bottom-bar i{
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    /* Optional "active" state */
+    .bottom-bar button.active{
+      color: var(--icon);
+      background: var(--clr-white-alpha-08);
+      box-shadow: inset 0 1px 0 var(--clr-white-alpha-12);
+    }
+
+    .tooltip-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .chat-list {
+        width: auto;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        margin-top: 5px;
+      }
+
+      .chat-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border: none; /* Remove default button border */
+        background: --chat-item-bg;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-align: left; /* Ensure text aligns to the left */
+        width: 100%; /* Make button take full width of container */
+        box-sizing: border-box; /* Include padding in button width */
+      }
+
+      .chat-item:hover {
+        background: rgba(43, 25, 64, 0.75);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        }
+
+      .avatar {
+        width: 50px;
+        height: 50px;
+        background-color: --avatar-bg-color;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: --avatar-color;
+        font-weight: bold;
+        font-size: 18px;
+        margin-right: 12px;
+            flex-shrink: 0; /* Prevent avatar from shrinking */
+      }
+
+      .contact-info {
+        flex: 1;
+            justify-content: center; /* Center vertically */
+
+      }
+
+      .name {
+        font-weight: bold;
+        margin-bottom: 4px;
+        color: --avatar-color;
+      }
+
+      .last-message {
+        font-size: 0.9em;
+        color: #555;
+      }
+
+      .chat-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border: none; /* Remove default button border */
+        background: var(--chat-item-bg);
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-align: left; /* Ensure text aligns to the left */
+        width: 100%; /* Make button take full width of container */
+        box-sizing: border-box; /* Include padding in button width */
+      }
+
+      .chat-item:hover {
+        background: var(rgba(43, 25, 64, 0.75));
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        }
+
+      .avatar {
+        width: 50px;
+        height: 50px;
+        background-color: var(--clr-purple-deep);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--clr-lavender-header);
+        font-weight: bold;
+        font-size: 18px;
+        margin-right: 12px;
+            flex-shrink: 0; /* Prevent avatar from shrinking */
+      }
+
+      .contact-info {
+        flex: 1;
+            justify-content: center; /* Center vertically */
+
+      }
+
+      .name {
+        font-weight: bold;
+        margin-bottom: 4px;
+        color: var(--clr-lavender-header);
+      }

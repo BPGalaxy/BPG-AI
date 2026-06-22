@@ -1,0 +1,88 @@
+/* ── Theme Toggle Button ────────────────────────────────────── */
+
+@keyframes gold-shimmer {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 300% center; }
+}
+@keyframes btn-sweep {
+  0%         { left: -75%; opacity: 0; }
+  30%        { opacity: 1; }
+  60%, 100%  { left: 130%; opacity: 0; }
+}
+@keyframes gold-pulse {
+  0%, 100% { box-shadow: 0 0 0px  #c8900000; border-color: #c8900040; }
+  50%      { box-shadow: 0 0 18px #c8900070; border-color: #f5c84290; }
+}
+@keyframes purple-pulse {
+  0%, 100% { box-shadow: 0 0 0px  #7c4dff00; border-color: #7c4dff40; }
+  50%      { box-shadow: 0 0 18px #7c4dff60; border-color: #b388ff80; }
+}
+
+#theme-toggle-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: 1px solid;
+  /* Gold (default) */
+  border-color: #7c4dff40;
+  background: linear-gradient(135deg, #0e0720, #1a0a2e, #0e0720);
+  animation: purple-pulse 3s ease-in-out infinite;
+
+  transition: transform 0.15s, filter 0.15s;
+}
+
+#theme-toggle-btn:hover {
+  transform: scale(1.04);
+  filter: brightness(1.15);
+}
+
+/* Light sweep */
+#theme-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(180, 140, 255, 0.15), transparent);
+  animation: btn-sweep 3s ease-in-out infinite;
+}
+
+/* Shimmer text */
+#theme-toggle-btn .btn-inner {
+  background: linear-gradient(90deg, #7c4dff, #b388ff, #e040fb, #9c27b0, #b388ff, #7c4dff);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gold-shimmer 3s linear infinite;
+  filter: drop-shadow(0 0 3px #9c27b0aa);
+}
+
+/* ── Purple mode overrides (applied by JS via .purple-mode) ── */
+
+#theme-toggle-btn.purple-mode {
+  border: 1px solid #c8900040;
+  background: linear-gradient(135deg, #1a1200, #2a1e00, #1a1200);
+  animation: gold-pulse 3s ease-in-out infinite;
+}
+
+#theme-toggle-btn.purple-mode::before {
+  background: linear-gradient(120deg, transparent, rgba(255, 220, 80, 0.18), transparent);
+}
+
+#theme-toggle-btn.purple-mode .btn-inner {
+  background: linear-gradient(90deg, #8a6200, #f5c842, #ffe066, #c89000, #f5c842, #8a6200);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gold-shimmer 3s linear infinite;
+  filter: drop-shadow(0 0 3px #c89000aa);
+}

@@ -1,0 +1,184 @@
+<!-- HTML Structure -->
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>404 | Lost in the Code</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --deep-space: #180435;
+            --nebula-dark: #24084a;
+            --starlight: #d7c9ff;
+            --glow: #e6d8ff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--deep-space);
+            color: var(--glow);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #particleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .container {
+            z-index: 2;
+            text-align: center;
+            background: rgba(36, 8, 74, 0.6);
+            padding: 3rem;
+            border: 1px solid var(--starlight);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 30px rgba(215, 201, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            color: var(--starlight);
+            text-shadow: 0 0 20px var(--nebula-dark);
+        }
+
+        .btn, a {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 10px 20px;
+            border: 1px solid var(--starlight);
+            background-color: #00000000;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--starlight);
+            text-decoration: none;
+            transition: 0.3s;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .btn:hover, a:hover {
+            background: var(--starlight);
+            color: var(--deep-space);
+            box-shadow: 0 0 5px var(--starlight);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+{% include 'site_messages.html' %}
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="container">
+        <h1>Your account is banned</h1>
+        <p>We're sorry but your account is banned by an admin for some reason.</p>
+        <a href="https://t.me/BP_Galaxy">Try telling your problem to owner</a><br>
+        <form action="{% url 'logout' %}" method="POST">
+                        {% csrf_token %}
+            <input type="submit" class="btn" value="Logout" style="margin-top:15px"/>
+        </form>
+    </div>
+    <script src="script.js"></script>
+</body>
+<script>
+    /* JS Particle Background */
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+let mouse = {
+    x: null,
+    y: null,
+    radius: 150
+};
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.baseX = this.x;
+        this.baseY = this.y;
+        this.speedX = Math.random() * 0.5 - 0.25;
+        this.speedY = Math.random() * 0.5 - 0.25;
+        this.density = Math.random() * 100 + 5;
+    }
+
+    update() {
+        // حرکت معمولی
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        // تعامل با cursor
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (mouse.x !== null && mouse.y !== null && distance < mouse.radius) {
+            const forceDirectionX = dx / distance;
+            const forceDirectionY = dy / distance;
+            const force = (mouse.radius - distance) / mouse.radius;
+            const directionX = forceDirectionX * force * this.density * 0.04;
+            const directionY = forceDirectionY * force * this.density * 0.04;
+
+            // جذب به سمت cursor
+            this.x -= directionX;
+            this.y -= directionY;
+        }
+    }
+
+    draw() {
+        ctx.fillStyle = '#d7c9ff';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function init() {
+    particles = [];
+    for (let i = 0; i < 200; i++) {
+        particles.push(new Particle());
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+    requestAnimationFrame(animate);
+}
+
+window.addEventListener('mousemove', (e) => {
+    mouse.x = e.x;
+    mouse.y = e.y;
+});
+
+window.addEventListener('mouseleave', () => {
+    mouse.x = null;
+    mouse.y = null;
+});
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    init();
+});
+
+init();
+animate();
+
+</script>
+</html>

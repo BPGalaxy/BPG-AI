@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block header_title %}
+    <div style="display: flex;">
+        <div class="header-title" >BPG AI</div>
+        {% if user_status.is_VIP %}
+            <span class="pill badge-vip"   onclick="showModal('vip')"  style="margin-bottom:3px;"><span class="inner">♦ VIP</span></span>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block style %}
+    {% include 'static/css/forms.style.css' %}
+    {% include 'static/css/theme-toggle-btn.css' %}
+    .badge-vip {
+        background: linear-gradient(135deg, #1a1200, #2a1e00, #1a1200);
+        border: 1px solid #c8900040;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        font-size: 12px;
+        animation: vip-pulse 3s ease-in-out infinite;
+        overflow: hidden;
+      }
+
+      .badge-vip span {
+        background: linear-gradient(90deg, #8a6200, #f5c842, #ffe066, #c89000, #f5c842, #8a6200);
+        background-size: 300% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gold-shimmer 3s linear infinite;
+        filter: drop-shadow(0 0 4px #c89000aa);
+      }
+
+      /* light sweep effect */
+      .badge-vip::before {
+        content: '';
+        top: 0; left: -75%;
+        width: 50%; height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,220,80,0.18), transparent);
+        animation: sweep 3s ease-in-out infinite;
+      }
+    .vip-line {
+        display: inline;
+        background: linear-gradient(90deg, #8a6200, #f5c842, #ffe066, #c89000, #f5c842, #8a6200);
+        background-size: 300% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gold-shimmer 3s linear infinite;
+        filter: drop-shadow(0 0 3px #c89000aa);
+        font-weight: 500;
+      }
+      @keyframes gold-shimmer {
+        0%   { background-position: 0% center; }
+        100% { background-position: 300% center; }
+      }
+      @keyframes vip-pulse {
+        0%, 100% { box-shadow: 0 0 0px #c8900000; border-color: #c8900040; }
+        50%       { box-shadow: 0 0 14px #c8900070; border-color: #f5c84290; }
+      }
+
+      @keyframes sweep {
+        0%   { left: -75%; opacity: 0; }
+        30%  { opacity: 1; }
+        60%  { left: 130%; opacity: 0; }
+        100% { left: 130%; opacity: 0; }
+      }
+
+{% endblock %}
+
+{% block content %}
+<div style="height:100%"></div>
+            <div class="form_container" style="margin:75px auto 0px auto;">
+                {% if user_status.is_owner %}
+            <span class="pill badge-owner" onclick="showModal('owner')" style="margin-bottom: 4px;">★ Owner</span>
+        {% endif %}
+        {% if user_status.is_developer %}
+            <span class="pill badge-dev"   onclick="showModal('dev')" style="margin-bottom: 4px;">Developer</span>
+        {% endif %}
+        {% if user_status.is_staff %}
+            <span class="pill badge-staff" onclick="showModal('staff')" style="margin-bottom: 4px;">Staff</span>
+        {% endif %}
+            </div>
+                <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+                  <div class="modal" id="modal">
+                    <div class="modal-icon" id="modal-icon"></div>
+                    <p class="modal-text"  id="modal-text"></p>
+                    <button class="modal-close" onclick="closeModal()"><span class="btn-inner">Got it</span></button>
+                  </div>
+                </div>
+                <div class="ai form_container" style="padding: 32px 20px 48px; max-width: 900px; margin: 0 auto; box-sizing: border-box; box-shadow:
+    0 0 0 1px rgba(120,68,219,0.08),
+    0 8px 40px rgba(0,0,0,0.5),
+    0 0 80px rgba(107,50,216,0.07);">
+
+                  <!-- Welcome -->
+                  <div style="text-align: center; margin-bottom: 32px;">
+                    <h3 style="color: var(--clr-lavender-header); margin: 0 0 8px; font-family: 'Noto Serif', Georgia;">Welcome to BPG AI, <i>{{ username }}</i></h3>
+                    <p style="font-size: 13px; color: var(--clr-purple-muted); margin: 0; font-family: 'Fredoka', Arial;">We use offline LLM models running on a single desktop PC for the most AI customization possible</p>
+                    <h4 style="color: var(--clr-lavender-header); margin: 18px 0 0px; font-family: 'Noto Serif', Georgia;">BPG AI now runs on L3-8B-Stheno-v3.2 — a model fine-tuned for roleplay for a better roleplay experience.</h3>
+                  </div>
+
+                  <!-- Features label -->
+                  <p style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.09em; color: var(--clr-purple-muted); margin: 0 0 12px; font-family: 'Noto Serif', Arial;">Features</p>
+
+                  <!-- Feature cards -->
+                  <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px;">
+
+                    <div class="features-div">
+                      <div style="width:38px; height:38px; border-radius:10px; background:var(--clr-purple-deep); border:1px solid var(--clr-purple-border-dark); display:flex; align-items:center; justify-content:center; color:var(--clr-lavender-light); font-size:18px; flex-shrink:0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-dashboard"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" /><path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" /><path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" /><path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" /></svg>                      </div>
+                      <div>
+                        <strong class="features-label">Clean, modern UI</strong>
+                        <span class="features-label description ">Simple and intuitive interface designed for a smooth experience.</span>
+                      </div>
+                    </div>
+
+                    <div class="features-div">
+                      <div style="width:38px; height:38px; border-radius:10px; background:var(--clr-purple-deep); border:1px solid var(--clr-purple-border-dark); display:flex; align-items:center; justify-content:center; color:var(--clr-lavender-light); font-size:18px; flex-shrink:0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-adjustments"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M6 4v4" /><path d="M6 12v8" /><path d="M10 16a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M12 4v10" /><path d="M12 18v2" /><path d="M16 7a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M18 4v1" /><path d="M18 9v11" /></svg>
+                      </div>
+                      <div>
+                        <strong class="features-label">Full customization</strong>
+                        <span class="features-label description">Tweak your AI assistant however you like — no restrictions.</span>
+                      </div>
+                    </div>
+
+                    <div class="features-div">
+                      <div style="width:38px; height:38px; border-radius:10px; background:var(--clr-purple-deep); border:1px solid var(--clr-purple-border-dark); display:flex; align-items:center; justify-content:center; color:var(--clr-lavender-light); font-size:18px; flex-shrink:0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-masks-theater"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M13.192 9h6.616a2 2 0 0 1 1.992 2.183l-.567 6.182a4 4 0 0 1 -3.983 3.635h-1.5a4 4 0 0 1 -3.983 -3.635l-.567 -6.182a2 2 0 0 1 1.992 -2.183" /><path d="M15 13h.01" /><path d="M18 13h.01" /><path d="M15 16.5c1 .667 2 .667 3 0" /><path d="M8.632 15.982a4.037 4.037 0 0 1 -.382 .018h-1.5a4 4 0 0 1 -3.983 -3.635l-.567 -6.182a2 2 0 0 1 1.992 -2.183h6.616a2 2 0 0 1 2 2" /><path d="M6 8h.01" /><path d="M9 8h.01" /><path d="M6 12c.764 -.51 1.528 -.63 2.291 -.36" /></svg>
+                      </div>
+                      <div>
+                        <strong style="display:block; font-size:13.5px; color:var(--clr-lavender-lighter); margin-bottom:4px;" class="features-label">AI roleplay characters</strong>
+                        <span style="font-size:12.5px; color:var(--clr-purple-muted); line-height:1.5;" class="features-label description">Create custom characters and bring your fantasies to life.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr style="border: none; border-top: 1px solid var(--clr-purple-divider); margin: 0 0 20px;">
+
+                  <!-- Footer -->
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center;">
+                    <p style="font-size:13px; color:var(--clr-purple-muted); margin:0; font-family: 'Fredoka', Arial;">New features and bug fixes will be added regularly</p>
+                    <a class="features-label-link browse" href="{% url 'browse_characters'%}">
+                      Browse Characters
+                    </a>
+                    <div style="display:flex; gap:10px;">
+                      <a class="features-label-link" href="https://github.com/BPGalaxy">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-github">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+                        </svg>GitHub
+                      </a>
+                      <a class="features-label-link" href="https://t.me/BP_Galaxy">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+                        </svg> Telegram
+                      </a>
+                    </div>
+                    <p style="font-size:12.5px; color:var(--clr-purple-border-dark); margin:0; font-family: 'Fredoka', Arial;">Made by <span style="color:var(--clr-lavender-header); font-family: 'FredokaBold', Arial;">Arthur</span> with ❤</p>
+                  </div>
+
+                </div>
+                <div style="margin:75px auto 0px auto;"></div>
+{% endblock %}
+

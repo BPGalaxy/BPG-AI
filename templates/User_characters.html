@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block header_title %}
+    <div class="header-title" >Your characters</div>
+{% endblock %}
+
+{% block topscript %}
+    {% include 'static/js/theme-switcher.js' %}
+{% endblock %}
+
+{% block style %}
+    {% include 'static/css/base.style.css' %}
+    {% include 'static/css/forms.style.css' %}
+    {% include 'static/css/theme-toggle-btn.css' %}
+{% endblock %}
+
+{% block content %}
+    {% load static %}
+        {% if checkDeleted %}
+            <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 85vh;">
+                <h3 class="header-title">You don't have any characters yet</h3>
+                <input type="submit" value="Make One" onclick="window.location.href='/create_character/';">
+            </div>
+        {% endif %}
+        <div class="characters-list">
+            {% for character in characters %}
+                    {% if not character.is_deleted %}
+                        <div class="character-card">
+                            <div class="character-card-inner">
+                                {% if character.ProfilePicture %}
+                                <div class="character-image-wrapper">
+                                    <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
+                                </div>
+                                {% else %}
+                                <div class="character-image-wrapper">
+                                    <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                </div>
+                                {% endif %}
+                                <div class="character-info">
+                                    <h3 class="character-name">{{ character.Name }}</h3>
+                                    <p>{{ character.Description }}</p>
+
+                                    <form method="POST" action="{% url 'public_status' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="character_id" value="{{ character.id }}">
+                                            {% if character.is_public %}
+                                                <button class="delete-character-btn">Make It Private</button>
+                                            {% else %}
+                                                <button class="delete-character-btn green">Make It Public</button>
+                                            {% endif %}
+                                        </form>
+
+                                    <form method="POST" action="{% url 'create_conversation' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="character_id" value="{{ character.id }}">
+                                        <button class="start-conversation-btn">Start Conversation</button>
+                                    </form>
+                                    
+                                    <form method="POST" action="{% url 'delete_character' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="character_id" value="{{ character.id }}">
+                                        <button class="delete-character-btn">Delete Character</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+            {% endfor %}
+        </div>
+{% endblock %}

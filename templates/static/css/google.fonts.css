@@ -1,0 +1,43 @@
+{% load static %}
+
+@font-face {
+  font-family: 'Noto Serif';
+  src: url("{% static 'fonts/NotoSerif.ttf' %}") format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url("{% static 'fonts/PlayfairDisplay.ttf' %}") format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Fredoka';
+  src: url("{% static 'fonts/Fredoka/static/Fredoka-Regular.ttf' %}") format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'FredokaBold';
+  src: url("{% static 'fonts/Fredoka/static/Fredoka-SemiBold.ttf' %}") format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Domine';
+  src: url("{% static 'fonts/Domine/static/Domine-Regular.ttf' %}") format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Bitcount Grid Single';
+  src: url("{% static 'fonts/Bitcount_Grid_Single/static/BitcountGridSingle-Regular.ttf' %}") format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Rubik Doodle Shadow';
+  src: url("{% static 'fonts/Rubik_Doodle_Shadow/RubikDoodleShadow-Regular.ttf' %}") format('truetype');
+  font-weight: 400;
+}

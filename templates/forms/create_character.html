@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    {% include 'static/css/forms.style.css' %}
+    .form_container label {
+            text-align: center;
+            padding: 0;
+        }
+    .picture-preview-container {
+        margin-top: 16px;
+        text-align: center;
+        display: none;
+    }
+    .picture-preview-container.show {
+        display: block;
+    }
+    .picture-preview {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 12px;
+        border: 1px solid var(--clr-purple-border-dark);
+        box-shadow: 0 0 12px var(--clr-purple-glow);
+        object-fit: cover;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    .preview-label {
+        display: block;
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--clr-purple-muted);
+        font-family: 'Fredoka', Arial;
+    }
+    @keyframes fadeIn {
+        from { 
+            opacity: 0; 
+            transform: scale(0.95); 
+        }
+        to { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
+    }
+{% endblock %}
+
+{% block topscript %}
+    {% include 'static/js/theme-switcher.js' %}
+{% endblock %}
+
+{% block header_title %}
+    <div class="header-title">Create Character</div>
+{% endblock %}
+{% block content %}
+    {% if not user_status.is_VIP %}
+        <div class="overlay open" id="SetMenu">
+            <div class="modal vip" id="modal">
+                <div class="modal-icon" id="modal-icon">♦</div>
+                <p class="modal-text" id="modal-text">Creating roleplay chatbot is only<br> available to <span class="modal-level">VIP</span> users.</p>
+                <form action="{% url 'homepage' %}" method="GET">
+                    <button type="submit" class="modal-close" onclick="document.getElementById('SetMenu').classList.remove('open');"><span class="btn-inner">Got it</span></button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    <div style="height:100%;"></div>
+        <div class="ai form_container" style="width:90%;margin-bottom:70px;"><span class="pill badge-vip" onclick="showModal('vip')" style="margin-bottom:-3px; cursor:default;"><span class="inner">♦ VIP</span></span>
+            <h2>Create Roleplay Character</h2>
+            <form action="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="picture-preview-container" id="previewContainer">
+                    <img id="picturePreview" class="picture-preview" alt="Character preview">
+                </div>
+                {{ form.as_p }}
+                <input type="submit" value="Done">
+            </form>
+        </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pictureInput = document.querySelector('input[type="file"].picture-input');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImage = document.getElementById('picturePreview');
+
+            if (pictureInput) {
+                pictureInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            previewImage.src = event.target.result;
+                            previewContainer.classList.add('show');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewContainer.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+    <div style=""></div>
+    </div>
+{% endblock %}

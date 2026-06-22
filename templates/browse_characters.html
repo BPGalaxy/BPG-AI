@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block style %}
+    {% include 'static/css/base.style.css' %}
+    {% include 'static/css/forms.style.css' %}
+    {% include 'static/css/theme-toggle-btn.css' %}
+{% endblock %}
+
+{% block header_title %}
+    <div class="header-title" >Search Characters</div>
+{% endblock %}
+
+{% block content %}
+            <form  class="input-area" method="POST" style="position:relative">
+                <div class="input-container">
+                <textarea
+                    name="user_search"
+                    hx-post="/search_results/"
+                    hx-trigger="keyup changed delay:300ms"
+                    hx-target="#search_results"
+                    hx-include="[name='user_search']"
+                    placeholder="Search your character name"
+                    id="autoResize"
+                    class="textareaInput"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    autofocus
+                    style="margin-left:15px; font-size:12px;"
+                ></textarea>
+                <input type="hidden" name="chat_id" id="chat_id_value" value="{{ chat_id }}">
+                <input type="hidden" name="edit_message_value" id="edit_message_value" value="">
+                </div>
+            </form>
+
+            <div id="search_results">
+                {% if no_characters %}
+                    <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 85vh;">
+                        <h3 class="header-title">No public characters found</h3>
+                    </div>
+                {% endif %}
+                <div class="characters-list" id="character-list">        
+                    {% for character in characters %}
+                            <div class="character-card">
+                                <div class="character-card-inner">
+                                    {% if character.ProfilePicture %}
+                                    <div class="character-image-wrapper">
+                                        <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
+                                    </div>
+                                    {% else %}
+                                    <div class="character-image-wrapper">
+                                        <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="character-info">
+                                        <h3 class="character-name">{{ character.Name }}</h3>
+                                        <p>{{ character.Description }}</p>
+                                        <form method="POST" action="{% url 'create_conversation' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="character_id" value="{{ character.id }}">
+                                            <button class="start-conversation-btn">Start Conversation</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                {% endfor %}
+                </div>
+            </div>
+{% endblock %}

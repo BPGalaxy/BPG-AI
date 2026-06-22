@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    {% include 'static/css/base.style.css' %}
+    {% include 'static/css/forms.style.css' %}
+    .card {
+  width: 75%;
+  margin: 100px auto 0 auto;
+  max-width: 520px;
+  background: rgba(26, 16, 39, 0.75);
+  border: 1px solid var(--clr-purple-divider);
+  border-radius: 20px;
+  padding: 2.75rem 2.5rem;
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 0 0 1px rgba(120,68,219,0.08),
+    0 8px 40px rgba(0,0,0,0.5),
+    0 0 80px rgba(107,50,216,0.07);
+  animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+ 
+/* ─── Brand ──────────────────────────────────────────── */
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 2rem;
+}
+.brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--clr-purple-btn), var(--clr-purple-glow));
+  border-radius: 10px;
+  display: grid; place-items: center;
+  box-shadow: 0 0 18px rgba(120,68,219,0.5);
+}
+.brand-icon svg { width: 18px; height: 18px; fill: white; }
+.brand-name {
+  font-family: 'Noto Serif', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--clr-lavender-header);
+  text-transform: uppercase;
+}
+ 
+/* ─── Heading ─────────────────────────────────────────── */
+.heading {
+  font-family: 'Noto Serif', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--clr-user-text-light);
+  margin-bottom: 0.35rem;
+  line-height: 1.2;
+}
+.subheading {
+    font-family: Fredoka, sans-serif;
+  font-size: 0.875rem;
+  color: var(--clr-purple-muted);
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+ 
+/* ─── Form ────────────────────────────────────────────── */
+.form { display: flex; flex-direction: column; gap: 1.1rem; }
+ 
+.field { display: flex; flex-direction: column; gap: 0.4rem; }
+.label {
+      font-family: Fredoka, sans-serif;
+
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clr-purple-muted);
+}
+ 
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap .icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  color: var(--clr-purple-muted);
+  display: flex; align-items: center;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+.input-wrap .icon svg { width: 15px; height: 15px; }
+ 
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 90%;
+  margin: 0 auto;
+  padding: 0.7rem 0.9rem 0.7rem 2.5rem;
+  background: var(--clr-purple-input-bg);
+  border: 1px solid var(--clr-purple-bar-border);
+  border-radius: 10px;
+  color: var(--clr-user-text-light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input::placeholder { color: rgba(167,150,207,0.4); }
+input:focus {
+  border-color: var(--clr-purple-glow);
+  box-shadow: 0 0 0 3px rgba(120,68,219,0.15);
+}
+.input-wrap:focus-within .icon { color: var(--clr-lavender-lighter); }
+ 
+.pw-toggle {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--clr-purple-muted); display: flex; align-items: center;
+  padding: 2px; transition: color 0.2s;
+}
+.pw-toggle:hover { color: var(--clr-lavender-lighter); }
+.pw-toggle svg { width: 15px; height: 15px; }
+ 
+/* ─── Button ─────────────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  padding: 0.8rem;
+  border: none; border-radius: 10px;
+  background: linear-gradient(135deg, var(--clr-purple-btn) 0%, var(--clr-purple-glow) 100%);
+  color: #fff;
+  font-family: 'Noto Serif', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  position: relative; overflow: hidden;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.15s;
+  box-shadow: 0 4px 20px rgba(107,50,216,0.35);
+}
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.9; box-shadow: 0 6px 28px rgba(107,50,216,0.5); transform: translateY(-1px); }
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:active { transform: translateY(0); }
+ 
+/* ─── Footer link ─────────────────────────────────────── */
+.footer-link {
+  font-family: Fredoka, sans-serif;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--clr-purple-muted);
+  margin-top: 1.5rem;
+}
+.footer-link a {
+  color: var(--clr-lavender-btn);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.footer-link a:hover { color: var(--clr-lavender-lighter); }
+ 
+/* ─── Messages ───────────────────────────────────────── */
+.msg {
+  font-size: 0.78rem; padding: 0.55rem 0.8rem;
+  border-radius: 8px; display: none; margin-bottom: 0.2rem;
+}
+.msg.error   { background: rgba(122,29,52,0.3); border: 1px solid var(--clr-red-dark); color: var(--clr-danger-light); }
+.msg.success { background: rgba(46,82,46,0.35); border: 1px solid var(--clr-green-dark); color: var(--clr-green-text); }
+ 
+/* ─── Password strength bar ──────────────────────────── */
+.strength-wrap { margin-top: -0.4rem; }
+.strength-label {
+  font-size: 0.7rem; color: var(--clr-purple-muted);
+  display: flex; justify-content: space-between;
+}
+.strength-bar { display: flex; gap: 3px; margin-top: 4px; }
+.strength-seg {
+  flex: 1; height: 3px; border-radius: 2px;
+  background: var(--clr-purple-bar-border);
+  transition: background 0.3s;
+}
+.strength-seg.weak   { background: var(--clr-red-dark); }
+.strength-seg.fair   { background: #8a6000; }
+.strength-seg.good   { background: #4a7a00; }
+.strength-seg.strong { background: var(--clr-green-dark); }
+{% endblock %}
+
+{% block topscript %}
+    {% include 'static/js/theme-switcher.js' %}
+{% endblock %}
+
+{% block header_title %}
+    <div class="header-title">Login</div>
+{% endblock %}
+
+{% block content %}
+    <div class="card" style="background: var(--clr-purple-ai-bg)">
+ 
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 20 20"><path d="M10 2L13.09 8.26L20 9.27L15 14.14L16.18 21.02L10 17.77L3.82 21.02L5 14.14L0 9.27L6.91 8.26L10 2Z" transform="scale(0.8) translate(1.2,1.2)"/></svg>
+    </div>
+    <span class="brand-name">BPG AI</span>
+  </div>
+ 
+  <div class="heading">Welcome Back</div>
+  <div class="subheading">Sign into your account to continue.</div>
+ 
+  <div id="register-msg" class="msg"></div>
+ 
+  <div class="form">
+    <div class="field">
+      <label class="label">Username</label>
+      <div class="input-wrap">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </span>
+        <input type="text" placeholder="your_handle" id="reg-username">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Password</label>
+      <div class="input-wrap">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        <input type="password" placeholder="••••••••" id="reg-password" autocomplete="new-password" oninput="checkStrength(this.value)">
+        <button class="pw-toggle" type="button" onclick="togglePw('reg-password', this)" aria-label="Toggle visibility">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+ 
+    <button class="btn-primary" onclick="doRegister()">Sign In</button>
+  </div>
+ 
+  <div class="footer-link">Don't have an account? <a href="/accounts/register/">Create one</a></div>
+ 
+</div>
+{% endblock %}
+
+{% block script %}
+    function togglePw(id, btn) {
+    const inp = document.getElementById(id);
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.innerHTML = show
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    }
+    
+    function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text; el.className = `msg ${type}`; el.style.display = 'block';
+    }
+    
+    function checkStrength(pw) {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    
+    const labels = ['—', 'Weak', 'Fair', 'Good', 'Strong'];
+    const classes = ['', 'weak', 'fair', 'good', 'strong'];
+    document.getElementById('strength-text').textContent = pw.length ? labels[score] : '—';
+    
+    for (let i = 1; i <= 4; i++) {
+        const seg = document.getElementById('seg' + i);
+        seg.className = 'strength-seg' + (i <= score ? ' ' + classes[score] : '');
+    }
+    }
+    
+    function doRegister() {
+    const user = document.getElementById('reg-username').value.trim();
+    const pw = document.getElementById('reg-password').value;
+    if (!user || !pw) { showMsg('register-msg', 'Please fill in all fields.', 'error'); return; }
+    const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "login" %}';
+        const fields = { Username: user, Password: pw };
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrfmiddlewaretoken';
+        csrf.value = '{{ csrf_token }}';
+        form.appendChild(csrf);
+        Object.entries(fields).forEach(([name, value]) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+    }
+{% endblock %}

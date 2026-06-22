@@ -1,0 +1,133 @@
+<style>
+.onetimemessages-container {
+    position: fixed;
+    top: 47px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000100;
+}
+
+.onetimemessage {
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: inline-block;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.onetimemessage.fade-out {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.onetimemessage-success {
+    background-color: #4CAF50;
+}
+
+.onetimemessage-error {
+    background-color: #F44336;
+}
+
+.onetimemessage-warning {
+    background-color: #FF9800;
+    color: #333;
+}
+
+.onetimemessage-info {
+    background-color: #2196F3;
+}
+
+.onetimemessage-debug {
+    background-color: #9E9E9E;
+}
+
+/* دکمه بستن */
+.onetimemessage-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.onetimemessage-close:hover {
+    opacity: 1;
+}
+
+/* انیمیشن‌ها */
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* واکنش‌گرایی */
+</style>
+
+
+{% if messages %}
+<div class="onetimemessages-container">
+    {% for message in messages %}
+    <div class="onetimemessage onetimemessage-{{ message.tags }}" id="onetimemessage-{{ forloop.counter }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+function closeMessage(messageId) {
+    const onetimemessage = document.getElementById(onetimemessageId);
+    if (onetimemessage) {
+        onetimemessage.classList.add('fade-out');
+        setTimeout(() => {
+            onetimemessage.remove();
+        }, 300);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const messages = document.querySelectorAll('.onetimemessage');
+    messages.forEach(message => {
+        setTimeout(() => {
+            if (message.parentNode) {
+                message.classList.add('fade-out');
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.remove();
+                    }
+                }, 300);
+            }
+        }, 3000);
+    });
+});
+</script>
+

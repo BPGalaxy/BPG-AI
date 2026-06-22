@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    {% include 'static/css/forms.style.css' %}
+{% endblock %}
+
+{% block topscript %}
+    {% include 'static/js/theme-switcher.js' %}
+    {% include 'static/js/htmx.min.js' %}
+{% endblock %}
+
+{% block header %}
+<div style="position: relative;">
+            <button type="button" class="icon-btn" id="optionsBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path fill="var(--clr-lavender-header)" d="M96 160C96 142.3 110.3 128 128 128L512 128C529.7 128 544 142.3 544 160C544 177.7 529.7 192 512 192L128 192C110.3 192 96 177.7 96 160zM96 320C96 302.3 110.3 288 128 288L512 288C529.7 288 544 302.3 544 320C544 337.7 529.7 352 512 352L128 352C110.3 352 96 337.7 96 320zM544 480C544 497.7 529.7 512 512 512L128 512C110.3 512 96 497.7 96 480C96 462.3 110.3 448 128 448L512 448C529.7 448 544 462.3 544 480z"/></svg>
+            </button>
+                <div class="dropdown-menu" id="optionsMenu">
+                    <div class="dropdown-caption">
+                        {{ chat_name }}
+                    </div>
+                    <button class="dropdown-item" type="submit" id="RenameBtn">Rename Chat</button>
+                    <button class="dropdown-item danger" type="submit" id="DeleteBtn">Delete Chat</button>
+                    <form action="{% url 'chats' %}" method="GET" style="margin: 0;">
+                        <button class="dropdown-item" type="submit">Back To Chats</button>
+                    </form>
+                </div>
+    </div>
+{% endblock %}
+
+{% block header_title %}
+    {% if Character.ProfilePicture %}
+        <div style="display: flex; width:100%; align-items: center;">
+            <img class="avatar profile-pic-toggle" id="profilePicToggle" style="object-fit:cover; margin-left:10px; margin-right:5px; cursor: pointer;" src="{{ Character.ProfilePicture.url }}" alt="{{ chat.chatname }}" class="profile-picture">
+            <div class="header-title">{{ chatname }}</div>
+        </div>
+        {% else %}
+        <div style="display: flex; width:100%; align-items: center; margin-left:10px;">
+            <div class="avatar profile-pic-toggle">{{avatar}}</div>
+            <div class="header-title" >{{ chatname }}</div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+  .rename-chat-box h2 {
+    margin: -5px 0 0px;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+  }
+</style>
+{% if is_limit %}
+                <form class="overlay open" id="SetMenu" action="{% url 'chats' %}" method="GET">
+                  <div class="modal vip" id="modal">
+                    <div class="modal-icon" id="modal-icon">♦</div>
+                    <p class="modal-text" id="modal-text">You've reached your daily limit<br>Get <span class="modal-level">VIP</span> for unlimited messages!</p>
+                    <button type="submit" class="modal-close">
+                        <span class="btn-inner">Got it</span>
+                    </button>
+                  </div>
+                </form>
+{% endif %}
+<div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="RenameMenu">
+    <button class="messagebox-close-btn" id="rename-close-btn">&times;</button>
+    <form action="{% url 'rename_chat' %}" method="POST" style="margin: 0;">
+        {% csrf_token %}
+      <h2>Rename Chat</h2>
+      <input type="hidden" id="chat_id_rename" name="chat_id_rename" value="{{ chat_id }}">
+      <input type="text" placeholder="Enter new chat name" id="RenameInput" name="RenameInput" value="{{chatname}}" required autocomplete="off" autocapitalize="off"/><br>
+      <input type="submit" value="Done"/>
+    </form>
+</div>
+
+<div class="messagebox-div" style="text-align:center; border-radius: 20px; " id="DeleteMenu">
+      <h2>Are you sure you want to delete this chat?</h2>
+      <form action="{% url 'delete_chat' %}" method="POST" style="all: unset;">
+          {% csrf_token %}
+          <input type="hidden" id="chat_id_delete" name="chat_id_delete" value="{{ chat_id }}">
+          <input type="submit" value="Yes" style="margin-right:70px; background: #7a1d34; color: #ffe5e5;"/>
+      </form>
+      <input type="submit" value="No" id="delete-close-btn"/>
+    </form>
+</div>
+
+<div class="blackOverlay" id="blackoverlay"></div>
+<div class="character-card Profile">
+    <div class="character-card-inner">
+        {% if Character.ProfilePicture %}
+            <div class="character-image-wrapper">
+                <img src="{{ Character.ProfilePicture.url }}" alt="{{ chatname }}'s Profile Picture" class="character-image">
+            </div>
+        {% else %}
+            <div class="character-image-wrapper">
+                <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ Character.avatar }}</div>
+             </div>
+        {% endif %}
+        {% if Character.is_rp %}
+            <div class="character-info">
+                <h3 class="character-name">{{ Character.Name }}</h3>
+                <p>{{ Character.Description }}</p>
+                <div class="input-container" id="creator-info" style="width:105%; margin-left:-2.5%; padding:5px;">
+                    <img class="avatar profile-pic-toggle" id="profilePicToggle" style="width:40px; height:40px;" src="{{ user_status.user_profile.url }}" alt="{{ chat.chatname }}" class="profile-picture">
+                    <p style="margin-left:-10px;">{{creator_status.accountid}}</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width:35px; height:35px; margin-left:auto;"><path fill="var(--clr-icon-muted)" transform="scale(0.8, 0.8) translate(80, 80)" d="M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z"/></svg>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+                    
+<div id="chat-box"
+    hx-get="/chats/load_messages/?chat_id={{chat_id}}"
+     hx-trigger="every 1s"
+     hx-swap="innerHTML">
+                {% include 'chats/get_messages.html' %}
+{% endblock %}
+
+{% block footer %}
+        <form  class="input-area" action="{% url 'handle_text' %}" method="POST">
+        {% csrf_token %}
+            <div class="input-container">
+            <textarea
+                name="user_text"
+                placeholder="Type your message..."
+                id="autoResize"
+                class="textareaInput"
+                autocomplete="off"
+                autocapitalize="off"
+                autofocus
+                style="margin-left:15px; font-size:12px;"
+            ></textarea>
+            <input type="hidden" name="chat_id" id="chat_id_value" value="{{ chat_id }}">
+            <input type="hidden" name="edit_message_value" id="edit_message_value" value="">
+            <button type="submit" aria-label="Submit" id="send_message"><svg role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M11.47 3.47a.75.75 0 0 1 1.06 0l6 6a.75.75 0 1 1-1.06 1.06l-4.72-4.72V20a.75.75 0 0 1-1.5 0V5.81l-4.72 4.72a.75.75 0 1 1-1.06-1.06z" clip-rule="evenodd"></path></svg></button>
+            </div>
+        </form>
+    </div>
+    <button id="scrollToBottomBtn" aria-label="Scroll to bottom">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+    <path d="M7 10l5 5 5-5z"/>
+  </svg>
+</button>
+{% endblock %}
+
+{% block script %}
+    // Scroll to bottom button functionality
+    const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+    let isAtBottom = true;
+
+    function scrollToBottom() {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function checkScrollPosition() {
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const pageHeight = document.body.offsetHeight;
+        const threshold = 100; // Show button if user is more than 100px from bottom
+
+        isAtBottom = pageHeight - scrollPosition < threshold;
+
+        if (!isAtBottom && !scrollToBottomBtn.classList.contains('show')) {
+            scrollToBottomBtn.classList.remove('hide');
+            scrollToBottomBtn.classList.add('show');
+        } else if (isAtBottom && scrollToBottomBtn.classList.contains('show')) {
+            scrollToBottomBtn.classList.remove('show');
+            scrollToBottomBtn.classList.add('hide');
+        }
+    }
+
+    // Listen to scroll events
+    window.addEventListener('scroll', checkScrollPosition);
+
+    // Click handler for the button
+    scrollToBottomBtn.addEventListener('click', scrollToBottom);
+
+    // Check position on page load
+    window.addEventListener('load', checkScrollPosition);
+
+    // Toggle character card on profile picture click
+    const profilePicToggle = document.getElementById('profilePicToggle');
+    const characterCard = document.querySelector('.character-card');
+    const blackOverlay = document.getElementById('blackoverlay');
+
+    if (profilePicToggle && characterCard) {
+        profilePicToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            characterCard.classList.toggle('open');
+            blackOverlay.classList.toggle('open');
+        });
+        document.addEventListener('click', function() {
+            characterCard.classList.remove('open');
+            blackOverlay.classList.remove('open');
+        });
+    }
+
+    const a = document.getElementById('autoResize');
+      const form = a.closest('form');
+
+      a.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault(); // stops newline in a
+          form.submit();      // submits the form
+        }
+      });
+
+    const RenameBtn = document.getElementById("RenameBtn");
+    const RenameMenu = document.getElementById("RenameMenu");
+    const RenameInput = document.getElementById("RenameInput");
+    const RenameCloseBtn = document.getElementById("rename-close-btn");
+
+    const DeleteBtn = document.getElementById("DeleteBtn");
+    const DeleteMenu = document.getElementById("DeleteMenu");
+    const DeleteCloseBtn = document.getElementById("delete-close-btn");
+
+    if (RenameMenu && RenameMenu) {
+        RenameBtn.addEventListener("click", (e) => {
+            DeleteMenu && DeleteMenu.classList.remove("open")
+            e.stopPropagation();
+            const isOpen = RenameMenu.classList.contains("open");
+            closeAllMenus();
+            if (!isOpen) {RenameMenu.classList.add("open") ; RenameInput.value="{{chatname}}"; RenameInput.focus(); RenameInput.select()};
+        });
+        RenameCloseBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            RenameMenu && RenameMenu.classList.remove("open");
+        });
+    }
+
+    if (DeleteMenu && DeleteMenu) {
+        DeleteBtn.addEventListener("click", (e) => {
+            RenameMenu && RenameMenu.classList.remove("open");
+            e.stopPropagation();
+            const isOpen = DeleteMenu.classList.contains("open");
+            closeAllMenus();
+            if (!isOpen) DeleteMenu.classList.add("open");
+        });
+        DeleteCloseBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            DeleteMenu && DeleteMenu.classList.remove("open");
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const MessageInput = document.getElementById("autoResize");
+        if (MessageInput) {
+            myTextarea.focus();
+        }
+    });
+{% endblock %}

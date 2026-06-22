@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block style %}
+    {% include 'static/css/base.style.css' %}
+    {% include 'static/css/forms.style.css' %}
+    {% include 'static/css/theme-toggle-btn.css' %}
+    
+{% endblock %}
+{% block header_title %}
+  <div class="header-title" >Profile</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102; background: #5c1212bb" id="DelAccMenu">
+    <h2 style="color:#ffe5e5">Are you sure you want to delete your account?</h2>
+    <input type="submit" class="delinput" value="YES, Delete" style="background: #300a0a; color:#ffe5e5" id="DelAcceptBtn"/>
+    <input type="submit" class="delinput" value="NO, Go Back" style="background: #300a0a; color:#ffe5e5" id="DelAccCloseBtn"/>
+</div>
+
+<div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102; background: #5c1212bb" id="DelAcceptMenu">
+    <button class="messagebox-close-btn" id="DelAccCloseBtn2">&times;</button>
+    <form action="{% url 'delete_account' %}" method="POST">
+        {% csrf_token %}
+        <h2 style="color:#ffe5e5">Enter your password to confirm action</h2>
+        <input type="password" class="delinput" style="background: #300a0a;  color:#ffe5e5" name="DeletePassword" required autocomplete="off" autocapitalize="off">
+        <input type="submit" class="delinput" value="DELETE ACCOUNT" style="background: #300a0a; color:#ffe5e5">
+    </form>
+</div>
+
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+                  <div class="modal" id="modal">
+                    <div class="modal-icon" id="modal-icon"></div>
+                    <p class="modal-text"  id="modal-text"></p>
+                    <button class="modal-close" onclick="closeModal()"><span class="btn-inner">Got it</span></button>
+                  </div>
+                </div>
+    <div class="page-title"></div>
+    {% if user_status.is_VIP %}
+            <div style="margin-top:71px;"></div>
+                <div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="SetMenu">
+                    <span class="pill badge-vip" style="margin-bottom:6px; cursor:default;"><span class="inner">♦ VIP</span></span>
+                    <form action="{% url 'get_instructions' %}" method="POST">
+                        {% csrf_token %}
+                        <button class="messagebox-close-btn" id="set-close-btn" type="button">&times;</button>
+                        <div style="width: auto; height: auto; padding: 5px 0px; background: #5c1212; border: solid #7a1d34; border-radius:10px;">
+                            <h2 style="font-size:14px; color: #ffe5e5;">Please note that these settings will only apply to default characters!</h2>
+                        </div>
+                        <h2>Custom Instructions</h2>
+                        <textarea name="CustomInstructions" cols="40" rows="4" placeholder="AI speech tone, respond style, etc." class="textarea-form" id="CustomInstructionsInput">{{customization.CustomInstructions}}</textarea><br>
+                        <h2>About You</h2>
+                        <input type="text" name="Name" placeholder="What should AI call you?" id="NameInput" required autocomplete="off" autocapitalize="off" value="{{customization.Name}}"/><br><br>
+                        <input type="text" name="Emoji" placeholder="Your favourite emoji(s)" id="EmojiInput" autocomplete="off" autocapitalize="off" value="{{customization.Emoji}}"/><br><br>
+                        <input type="text" name="Occupation" placeholder="Your occupation" id="OccupationInput" autocomplete="off" autocapitalize="off" value="{{customization.Occupation}}"/><br><br>
+                        <input type="text" name="Interests" placeholder="Your interests, habits, etc." id="InterestsInput" autocomplete="off" autocapitalize="off" value="{{customization.Interests}}"/><br>
+                        <input type="submit" value="Save"/>
+                    </form>
+                </div>
+        {% else %}
+            <div style="margin-top:71px;"></div>
+                <div class="overlay" id="SetMenu">
+                  <div class="modal vip" id="modal">
+                    <div class="modal-icon" id="modal-icon">♦</div>
+                    <p class="modal-text" id="modal-text">AI customization is only<br> available to <span class="modal-level">VIP</span> users.</p>
+                    <button type="button" class="modal-close"
+                    onclick="document.getElementById('SetMenu').classList.remove('open');">
+                        <span class="btn-inner">Got it</span>
+                    </button>
+                  </div>
+                </div>
+        {% endif %}
+<!-- Avatar -->
+<div class="avatar-wrapper">
+  <div style="position:relative; display:inline-block;">
+    <div class="avatar-circle">
+      {% if user_status.user_profile == "" or user_status.user_profile == None %}
+        <div class="avatar-placeholder" id="avatar-preview">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+            <circle cx="50" cy="35" r="18" fill="var(--clr-purple-muted)" opacity="0.6"/>
+            <ellipse cx="50" cy="80" rx="28" ry="22" fill="var(--clr-purple-muted)" opacity="0.6"/>
+          </svg>
+        </div>
+      {% else %}
+        <img class="avatar profile-pic-toggle" id="profilePicToggle"  src="{{ user_status.user_profile.url }}" alt="User Profile" class="profile-picture">
+      {% endif %}
+    </div>
+    <div class="camera-btn" id="camera-btn">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-10.5h-1.8l-1.4-1.5H8.2L6.8 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="messagebox-div" id="crop-overlay">
+  <div id="crop-area">
+    <img id="crop-img" draggable="false" />
+    <div class="crop-frame" id="crop-frame"></div>
+  </div>
+  <p class="crop-hint">Drag to reposition · Scroll to zoom</p>
+  <div class="crop-actions">
+    <button id="cancel-btn">Cancel</button>
+    <button class="primary" id="save-btn">Save</button>
+  </div>
+</div>
+
+<input type="file" id="avatar-file-input" accept="image/*" style="display:none" />
+<canvas id="crop-canvas"></canvas>
+
+<div class="list">
+ 
+  <!-- Name -->
+  <div class="list-row">
+    <div class="row-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+    </div>
+    <div class="row-content">
+      <div class="row-label">Username</div>
+      <div class="row-value">{{user_status.accountid}}</div>
+    </div>
+  </div>
+ 
+  <!-- Personas -->
+  <div class="list-row" id="SetBtn">
+    <div class="row-icon">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4V6zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+    </div>
+    <div class="row-content">
+      <div class="row-value">Personas</div>
+    </div>
+    <div class="row-right chevron">
+      <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>
+  </div>
+
+  <form class="list-row" id="SetBtn" onclick="this.querySelector('button').click()" action="{% url 'user_characters' %}">
+    <button type="submit" hidden></button>
+    <div class="row-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:none" stroke="var(--clr-lavender-header)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-masks-theater"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M13.192 9h6.616a2 2 0 0 1 1.992 2.183l-.567 6.182a4 4 0 0 1 -3.983 3.635h-1.5a4 4 0 0 1 -3.983 -3.635l-.567 -6.182a2 2 0 0 1 1.992 -2.183"></path><path d="M15 13h.01"></path><path d="M18 13h.01"></path><path d="M15 16.5c1 .667 2 .667 3 0"></path><path d="M8.632 15.982a4.037 4.037 0 0 1 -.382 .018h-1.5a4 4 0 0 1 -3.983 -3.635l-.567 -6.182a2 2 0 0 1 1.992 -2.183h6.616a2 2 0 0 1 2 2"></path><path d="M6 8h.01"></path><path d="M9 8h.01"></path><path d="M6 12c.764 -.51 1.528 -.63 2.291 -.36"></path></svg>
+    </div>
+    <div class="row-content">
+      <div class="row-value">Your Characters</div>
+    </div>
+    <div class="row-right chevron">
+      <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>
+  </form>
+ 
+  <!-- Messages -->
+  <div class="list-row">
+    <div class="row-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    </div>
+    <div class="row-content">
+      <div class="row-label">Free messages left</div>
+      {% if user_status.is_VIP %}
+        <div class="row-value">unlimited</div>
+      {% else %}
+        <div class="row-value">{{user_status.remaining_messages}}/100</div>
+      {% endif %}
+    </div>
+    {% if not user_status.is_VIP %}
+      <div class="row-right">
+        <button class="premium-btn">Get Premium</button>
+      </div>
+    {% else %}
+      <span class="pill badge-vip" style="margin-bottom:3px;"><span class="inner">♦ VIP</span></span>
+    {% endif %}
+  </div>
+ 
+</div>
+ 
+<div class="list">
+  <!-- Contact -->
+  <div class="list-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+    <div style="display:flex; align-items:center; gap:16px; width:100%;">
+      <div class="row-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </div>
+      <div class="row-content">
+        <div class="row-label">Contact</div>
+        <div class="row-value" style="font-size:15px; color:var(--clr-user-text-light);">alirezaasadpoor1388@example.com</div>
+      </div>
+    </div>
+    <div style="padding-left: 44px; font-size:13px; font-family: 'Fredoka', Arial; color:var(--clr-user-text-muted);">Got a question or complaint? Send us an email.</div>
+  </div>
+ 
+  <!-- Telegram -->
+  <div class="list-row" onclick="window.open('https://t.me/BP_Galaxy', '_blank'). focus()">
+    <div class="row-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" style="fill: none" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--clr-lavender-header)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+        </svg>
+    </div>
+    <div class="row-content">
+      <div class="row-value">Telegram</div>
+    </div>
+    <div class="row-right chevron">
+      <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>
+  </div>
+
+  <!-- Github -->
+  <div class="list-row" onclick="window.open('https://github.com/BPGalaxy', '_blank'). focus()">
+    <div class="row-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" style="fill: none" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--clr-lavender-header)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-github">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+        </svg>
+    </div>
+    <div class="row-content">
+      <div class="row-value">Github</div>
+    </div>
+    <div class="row-right chevron">
+      <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>
+  </div>
+ 
+  <!-- Twitter -->
+  <div class="list-row" onclick="window.open('https://x.com/Music_lovr0', '_blank'). focus()">
+    <div class="row-icon">
+      <svg viewBox="0 0 24 24"><path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/></svg>
+    </div>
+    <div class="row-content">
+      <div class="row-value">Twitter</div>
+    </div>
+    <div class="row-right chevron">
+      <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>
+  </div>
+ 
+  <!-- Instagram -->
+  <div class="list-row" onclick="window.open('https://www.instagram.com/bp_galaxy0', '_blank'). focus()">
+    <div class="row-icon">
+      <svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+    </div>
+    <div class="row-content">
+      <div class="row-value">Instagram</div>
+    </div>
+    <div class="row-right chevron">
+      <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>
+  </div>
+  <style>
+  .profile-btn { transition: transform 0.18s ease; }
+  .profile-btn:hover { transform: translateY(-2px); }
+</style>
+
+<div style="display:flex; flex-direction:column; gap:10px; padding:20px 16px 40px;">
+
+  <a href="{% url 'logout' %}" class="profile-btn" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:14px; font-size:15px; font-weight:500; cursor:pointer; text-decoration:none; background:var(--clr-purple-btn); border:1px solid var(--clr-purple-bar-border); color:var(--clr-user-text-light);">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--clr-user-text-light)"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+    Log out
+  </a>
+
+  <hr style="border:none; border-top:1px solid var(--clr-purple-divider); margin:2px 0;">
+
+  <button id="DelAccBtn" class="profile-btn" onclick="document.getElementById('deleteConfirm').style.display='block'; this.style.display='none';" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 20px; border-radius:14px; font-size:15px; font-weight:500; cursor:pointer; background:transparent; border:1px solid #7a1d34; color:#e05a6a; width:100%; box-sizing:border-box;">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="#e05a6a"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+    Delete account
+  </button>
+
+</div>
+</div>
+<div style="margin:75px auto 0px auto;"></div>
+{% endblock %}
+
+{% block script %}
+    
+
+    const DelAccBtn = document.getElementById("DelAccBtn");
+    const DelAccMenu = document.getElementById("DelAccMenu");
+    const DelAccCloseBtn = document.getElementById("DelAccCloseBtn");
+
+    if (DelAccMenu && DelAccMenu) {
+        DelAccBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = DelAccMenu.classList.contains("open");
+            closeAllMenus();
+            if (!isOpen) DelAccMenu.classList.add("open");
+        });
+        DelAccCloseBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            DelAccMenu && DelAccMenu.classList.remove("open");
+        });
+    }
+
+    const DelAcceptBtn = document.getElementById("DelAcceptBtn");
+    const DelAcceptMenu = document.getElementById("DelAcceptMenu");
+    const DelAccCloseBtn2 = document.getElementById("DelAccCloseBtn2");
+
+    if (DelAcceptMenu && DelAcceptMenu) {
+        DelAcceptBtn.addEventListener("click", (e) => {
+            DelAccMenu && DelAccMenu.classList.remove("open");
+            e.stopPropagation();
+            const isOpen = DelAcceptMenu.classList.contains("open");
+            closeAllMenus();
+            if (!isOpen) DelAcceptMenu.classList.add("open");
+        });
+        DelAccCloseBtn2.addEventListener("click", (e) => {
+            e.stopPropagation();
+            DelAcceptMenu && DelAcceptMenu.classList.remove("open");
+        });
+    }
+
+    const cameraBtn = document.getElementById('camera-btn');
+    const fileInput = document.getElementById('avatar-file-input');
+    const overlay = document.getElementById('crop-overlay');
+    const cropArea = document.getElementById('crop-area');
+    const cropImg = document.getElementById('crop-img');
+    const cropFrame = document.getElementById('crop-frame');
+    const saveBtn = document.getElementById('save-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const canvas = document.getElementById('crop-canvas');
+    const avatarPreview = document.getElementById('avatar-preview');
+
+const AREA = 288;
+let imgW = 0, imgH = 0, scale = 1, minScale = 1;
+let offsetX = 0, offsetY = 0;
+let dragging = false, startX, startY, startOX, startOY;
+
+cameraBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  cropImg.onload = () => {
+    imgW = cropImg.naturalWidth;
+    imgH = cropImg.naturalHeight;
+    minScale = Math.max(AREA / imgW, AREA / imgH);
+    scale = minScale;
+    offsetX = (AREA - imgW * scale) / 2;
+    offsetY = (AREA - imgH * scale) / 2;
+    applyTransform();
+    cropFrame.style.cssText = `left:0;top:0;width:${AREA}px;height:${AREA}px;`;
+    overlay.classList.add('open');
+  };
+  cropImg.src = url;
+  fileInput.value = '';
+});
+
+function applyTransform() {
+  cropImg.style.width = (imgW * scale) + 'px';
+  cropImg.style.height = (imgH * scale) + 'px';
+  offsetX = Math.min(0, Math.max(AREA - imgW * scale, offsetX));
+  offsetY = Math.min(0, Math.max(AREA - imgH * scale, offsetY));
+  cropImg.style.left = offsetX + 'px';
+  cropImg.style.top = offsetY + 'px';
+}
+
+cropArea.addEventListener('mousedown', e => {
+  dragging = true;
+  startX = e.clientX; startY = e.clientY;
+  startOX = offsetX; startOY = offsetY;
+  e.preventDefault();
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  offsetX = startOX + (e.clientX - startX);
+  offsetY = startOY + (e.clientY - startY);
+  applyTransform();
+});
+window.addEventListener('mouseup', () => dragging = false);
+
+cropArea.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 0.05 : -0.05;
+  const newScale = Math.max(minScale, Math.min(scale * 4, scale + delta));
+  const cx = AREA / 2, cy = AREA / 2;
+  offsetX = cx - (cx - offsetX) * (newScale / scale);
+  offsetY = cy - (cy - offsetY) * (newScale / scale);
+  scale = newScale;
+  applyTransform();
+}, { passive: false });
+
+saveBtn.addEventListener('click', () => {
+  canvas.width = 200; canvas.height = 200;
+  const ctx = canvas.getContext('2d');
+
+  // Convert screen offset back to source image coordinates
+  const sx = -offsetX / scale;
+  const sy = -offsetY / scale;
+  const sSize = AREA / scale; // how many source pixels fit in the crop area
+
+  ctx.drawImage(cropImg, sx, sy, sSize, sSize, 0, 0, 200, 200);
+
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = "{% url 'userpage' %}";
+
+  const csrf = document.createElement('input');
+  csrf.type = 'hidden';
+  csrf.name = 'csrfmiddlewaretoken';
+  csrf.value = '{{ csrf_token }}';
+
+  const imgInput = document.createElement('input');
+  imgInput.type = 'hidden';
+  imgInput.name = 'avatar';
+  imgInput.value = dataUrl;
+
+  form.appendChild(csrf);
+  form.appendChild(imgInput);
+  document.body.appendChild(form);
+  form.submit();
+});
+
+cancelBtn.addEventListener('click', () => overlay.classList.remove('open'));
+
+const SetBtn = document.getElementById("SetBtn");
+    const SetMenu = document.getElementById("SetMenu");
+    const SetCloseBtn = document.getElementById("set-close-btn");
+
+    const CustomInstructionsInput = document.getElementById("CustomInstructionsInput");
+    const NameInput = document.getElementById("NameInput");
+    const EmojiInput = document.getElementById("EmojiInput");
+    const OccupationInput = document.getElementById("OccupationInput");
+    const InterestsInput = document.getElementById("InterestsInput");
+
+    if (SetMenu && SetMenu) {
+        SetBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = SetMenu.classList.contains("open");
+            closeAllMenus();
+            if (!isOpen) SetMenu.classList.add("open");
+        });
+        SetCloseBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            SetMenu && SetMenu.classList.remove("open");
+            const _decode = html => { const t = document.createElement('textarea'); t.innerHTML = html; return t.value; };
+            CustomInstructionsInput.value = _decode("{{customization.CustomInstructions}}");
+            NameInput.value = _decode("{{customization.Name}}");
+            EmojiInput.value = _decode("{{customization.Emoji}}");
+            OccupationInput.value = _decode("{{customization.Occupation}}");
+            InterestsInput.value = _decode("{{customization.Interests}}");
+        });
+    }
+{% endblock %}
