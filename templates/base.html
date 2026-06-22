@@ -7,13 +7,13 @@
     <style>{% include 'static/css/base.style.css' %}</style>
     <style> {% include 'static/css/all.min.css' %}</style>
     <style> {% include 'static/css/google.fonts.css' %}</style>
-    
+    <style>
+        {% block style %}
+        {% endblock %}
+    </style>
 </head>
 
-<style>
-    {% block style %}
-    {% endblock %}
-</style>
+
 {% load static %}
 
 <script>
@@ -28,6 +28,7 @@
           });
       }
 {% endblock %}
+
 </script>
 
 <body>

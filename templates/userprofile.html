@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+<title>Profile</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
+
+{% block style %}
+    {% include 'static/css/base.style.css' %}
+    {% include 'static/css/forms.style.css' %}
+    {% include 'static/css/theme-toggle-btn.css' %}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.profile-wrap { max-width: 620px; margin: 0 auto; padding: 0 0 4rem; }
+ 
+  /* Dark header section */
+ 
+  /* Username row */
+  .username-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
+  .username { font-size: 18px; font-weight: 600; color: #f5f5f5; }
+  .username-dots { color: #aaa; font-size: 20px; cursor: pointer; line-height: 1; margin-left: 2px; }
+ 
+  /* Header row: avatar + stats */
+  .profile-header { display: flex; align-items: center; gap: 1.75rem; margin-bottom: 1rem; }
+  .avatar-ring { width: 86px; height: 86px; border-radius: 50%; border: 2px solid #444; padding: 3px; flex-shrink: 0; }
+  .avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: #c8c8ff; letter-spacing: -0.5px; }
+ 
+  .stats { display: flex; gap: 0; flex: 1; }
+  .stat { display: flex; flex-direction: column; align-items: flex-start; gap: 0; flex: 1; }
+  .stat-row { display: flex; align-items: baseline; gap: 5px; }
+  .stat-val { font-size: 15px; font-weight: 700; color: #f5f5f5; }
+  .stat-lbl { font-size: 13px; color: #f5f5f5; }
+ 
+  /* Bio */
+  .bio { margin:40px; flex: 1;}
+  .bio-handle { font-size: 13px; color: #aaa; margin-bottom: 6px; }
+  .bio-line { font-size: 14px; color: #d8d8d8; line-height: 1.6; display: flex; align-items: flex-start; gap: 6px; }
+  .bio-link { font-size: 14px; color: #6fa8dc; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .bio-link i { font-size: 15px; }
+ 
+  /* Divider */
+  .divider { height: 1px; background: #222; margin: 0; }
+ 
+  /* Tabs */
+  .tab-bar { display: flex; border-bottom: 1px solid #222; margin-bottom: 2px; background: #000; }
+  .tab { flex: 1; padding: 11px 0; text-align: center; cursor: pointer; border-bottom: 2px solid transparent; transition: border-color 0.15s; }
+  .tab.active { border-bottom: 2px solid #f5f5f5; }
+  .tab i { font-size: 22px; color: #555; }
+  .tab.active i { color: #f5f5f5; }
+ 
+  /* Grid */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; background: #000; }
+  .post { aspect-ratio: 1 / 1; overflow: hidden; cursor: pointer; position: relative; }
+  .post-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+  .post-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .post:hover .post-overlay { opacity: 1; }
+  .post-overlay span { color: #fff; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+  .post-overlay i { font-size: 17px; }
+ 
+  @media (max-width: 480px) {
+    .profile-header { gap: 1.25rem; }
+    .avatar-ring { width: 72px; height: 72px; }
+  }
+{% endblock %}
+
+{% block header %}
+        <div class="header-title" style="margin-left:auto;">{{ user_status.accountid }}</div>
+        {% if user_status.is_VIP %}
+            <span class="pill badge-vip" style="margin-right:auto" style="margin-bottom:3px;"><span class="inner">♦ VIP</span></span>
+        {% endif %}
+{% endblock %}
+{% block content %}
+<div style="width:10px; margin-bottom:100px;"></div>
+
+    <div class="avatar-wrapper">
+        <div style="position:relative; display:inline-block;">
+            <div class="avatar-circle">
+            {% if user_status.user_profile == "" or user_status.user_profile == None %}
+                <div class="avatar-placeholder" id="avatar-preview">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+                    <circle cx="50" cy="35" r="18" fill="var(--clr-purple-muted)" opacity="0.6"/>
+                    <ellipse cx="50" cy="80" rx="28" ry="22" fill="var(--clr-purple-muted)" opacity="0.6"/>
+                </svg>
+                </div>
+            {% else %}
+                <img class="avatar profile-pic-toggle" id="profilePicToggle"  src="{{ user_status.user_profile.url }}" alt="User Profile" class="profile-picture">
+            {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+<div class="dropdown-divider"></div>
+
+<div class="header-title" style="text-align: center; font-size:20px;margin-top:10px">Created Characters</div>
+<div class="characters-list">        
+                    {% for character in characters %}
+                            <div class="character-card">
+                                <div class="character-card-inner">
+                                    {% if character.ProfilePicture %}
+                                    <div class="character-image-wrapper">
+                                        <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
+                                    </div>
+                                    {% else %}
+                                    <div class="character-image-wrapper">
+                                        <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="character-info">
+                                        <h3 class="character-name">{{ character.Name }}</h3>
+                                        <p>{{ character.Description }}</p>
+                                        <form method="POST" action="{% url 'create_conversation' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="character_id" value="{{ character.id }}">
+                                            <button class="start-conversation-btn">Start Conversation</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                {% endfor %}
+                </div>
+{% endblock %}

@@ -972,6 +972,7 @@ body {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
+  font-family: 'Noto Serif', sans-serif;
   color: var(--clr-lavender-light);
   transition: color 0.3s ease;
 }
