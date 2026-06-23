@@ -602,6 +602,7 @@ body {
 
         ::-webkit-scrollbar{
             background-color: var(--clr-drawer-bg);
+            width:5px;
         }
         ::-webkit-scrollbar-thumb {
             margin: 2px;
@@ -687,7 +688,7 @@ body {
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       box-shadow: 0 0px 10px var(--clr-purple-bar-border-glow), inset 0 1px 0 var(--clr-input-shadow);
-      z-index: 9999;
+      z-index: 0;
     }
 
     .bottom-bar-btn{
@@ -876,8 +877,6 @@ body {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4),
               0 0 30px var(--clr-purple-bar-border-glow),
               inset 0 1px 0 var(--clr-input-shadow);
-  border-color: var(--clr-lavender-light);
-  background: linear-gradient(135deg, var(--clr-purple-hover), var(--clr-purple-deep));
 }
 
 .character-card-inner {
@@ -979,7 +978,7 @@ body {
 
 .character-card:hover .character-name {
   color: var(--clr-lavender-lightest);
-  text-shadow: 0 0 10px rgba(230, 216, 255, 0.5);
+  text-shadow: 0 0 10px var(--clr-lavender-lightest);
 }
 
 .start-conversation-btn {
@@ -1240,18 +1239,15 @@ body {
   }
  
   .camera-btn {
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
     width: 40px;
     height: 40px;
-    background: var(--clr-purple-btn);
+    background: var(--theme-ring-c);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(107, 50, 216, 0.5);
+    box-shadow: 0 0 10px var(--theme-glow);
   }
  
   .camera-btn svg {

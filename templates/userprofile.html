@@ -3,94 +3,149 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css" />
 
 {% block style %}
-    {% include 'static/css/base.style.css' %}
     {% include 'static/css/forms.style.css' %}
+    {% include 'static/css/vip-themes.css' %}
     {% include 'static/css/theme-toggle-btn.css' %}
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-.profile-wrap { max-width: 620px; margin: 0 auto; padding: 0 0 4rem; }
- 
-  /* Dark header section */
- 
-  /* Username row */
-  .username-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
-  .username { font-size: 18px; font-weight: 600; color: #f5f5f5; }
-  .username-dots { color: #aaa; font-size: 20px; cursor: pointer; line-height: 1; margin-left: 2px; }
- 
-  /* Header row: avatar + stats */
-  .profile-header { display: flex; align-items: center; gap: 1.75rem; margin-bottom: 1rem; }
-  .avatar-ring { width: 86px; height: 86px; border-radius: 50%; border: 2px solid #444; padding: 3px; flex-shrink: 0; }
-  .avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: #c8c8ff; letter-spacing: -0.5px; }
- 
-  .stats { display: flex; gap: 0; flex: 1; }
-  .stat { display: flex; flex-direction: column; align-items: flex-start; gap: 0; flex: 1; }
-  .stat-row { display: flex; align-items: baseline; gap: 5px; }
-  .stat-val { font-size: 15px; font-weight: 700; color: #f5f5f5; }
-  .stat-lbl { font-size: 13px; color: #f5f5f5; }
- 
-  /* Bio */
-  .bio { margin:40px; flex: 1;}
-  .bio-handle { font-size: 13px; color: #aaa; margin-bottom: 6px; }
-  .bio-line { font-size: 14px; color: #d8d8d8; line-height: 1.6; display: flex; align-items: flex-start; gap: 6px; }
-  .bio-link { font-size: 14px; color: #6fa8dc; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
-  .bio-link i { font-size: 15px; }
- 
-  /* Divider */
-  .divider { height: 1px; background: #222; margin: 0; }
- 
-  /* Tabs */
-  .tab-bar { display: flex; border-bottom: 1px solid #222; margin-bottom: 2px; background: #000; }
-  .tab { flex: 1; padding: 11px 0; text-align: center; cursor: pointer; border-bottom: 2px solid transparent; transition: border-color 0.15s; }
-  .tab.active { border-bottom: 2px solid #f5f5f5; }
-  .tab i { font-size: 22px; color: #555; }
-  .tab.active i { color: #f5f5f5; }
- 
-  /* Grid */
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; background: #000; }
-  .post { aspect-ratio: 1 / 1; overflow: hidden; cursor: pointer; position: relative; }
-  .post-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
-  .post-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 18px; }
-  .post:hover .post-overlay { opacity: 1; }
-  .post-overlay span { color: #fff; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-  .post-overlay i { font-size: 17px; }
- 
-  @media (max-width: 480px) {
-    .profile-header { gap: 1.25rem; }
-    .avatar-ring { width: 72px; height: 72px; }
-  }
 {% endblock %}
 
 {% block header %}
-        <div class="header-title" style="margin-left:auto;">{{ user_status.accountid }}</div>
-        {% if user_status.is_VIP %}
-            <span class="pill badge-vip" style="margin-right:auto" style="margin-bottom:3px;"><span class="inner">♦ VIP</span></span>
-        {% endif %}
+  {% if not UserNotFound %}
+    <div class="header-title" style="margin-left:auto; margin-right:auto;">{{user_status.accountid}}'s Profile</div>
+  {% else %}
+    <div class="header-title" style="margin-left:auto; margin-right:auto;">{{user_status.accountid}}User not found</div>
+  {% endif %}
 {% endblock %}
 {% block content %}
-<div style="width:10px; margin-bottom:100px;"></div>
 
-    <div class="avatar-wrapper">
-        <div style="position:relative; display:inline-block;">
-            <div class="avatar-circle">
-            {% if user_status.user_profile == "" or user_status.user_profile == None %}
-                <div class="avatar-placeholder" id="avatar-preview">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-                    <circle cx="50" cy="35" r="18" fill="var(--clr-purple-muted)" opacity="0.6"/>
-                    <ellipse cx="50" cy="80" rx="28" ry="22" fill="var(--clr-purple-muted)" opacity="0.6"/>
-                </svg>
-                </div>
-            {% else %}
-                <img class="avatar profile-pic-toggle" id="profilePicToggle"  src="{{ user_status.user_profile.url }}" alt="User Profile" class="profile-picture">
-            {% endif %}
-            </div>
-        </div>
+{% if not UserNotFound %}
+
+<div class="vip-profile-section {{ user_status.user_theme }}">
+
+  {% if user_status.is_VIP %}
+    <canvas id="vip-particles"></canvas>
+  {% endif %}
+
+  <div class="vip-content">
+
+    <!-- Name + VIP badge -->
+    <div class="vip-name-row">
+      <div class="header-title">{{ user_status.accountid }}</div>
+      {% if user_status.is_VIP %}
+        <span class="pill badge-vip"><span class="inner">♦ VIP</span></span>
+      {% endif %}
     </div>
 
+    <!-- Stars (VIP only) -->
+    {% if user_status.is_VIP %}
+      <div class="vip-stars">
+        <span class="star" style="--d:1.4s; --delay:0s">★</span>
+        <span class="star" style="--d:1.8s; --delay:0.3s">★</span>
+        <span class="star" style="--d:1.3s; --delay:0.6s">★</span>
+        <span class="star" style="--d:2s;   --delay:0.2s">★</span>
+        <span class="star" style="--d:1.6s; --delay:0.5s">★</span>
+      </div>
+    {% endif %}
+
+    <!-- Avatar -->
+    <div class="avatar-wrapper" style="margin-top: 10px;">
+      <div class="avatar-outer">
+        {% if user_status.is_VIP %}
+          <div class="crown">👑</div>
+          <div class="avatar-glow"></div>
+          <div class="avatar-ring"></div>
+        {% endif %}
+        <div class="avatar-circle" style="border:3px solid var(--theme-border);">
+          {% if user_status.user_profile == "" or user_status.user_profile == None %}
+            <div class="avatar-placeholder" id="avatar-preview">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+                <circle cx="50" cy="35" r="18" fill="var(--clr-purple-muted)" opacity="0.6"/>
+                <ellipse cx="50" cy="80" rx="28" ry="22" fill="var(--clr-purple-muted)" opacity="0.6"/>
+              </svg>
+            </div>
+          {% else %}
+            <img class="avatar profile-pic-toggle" id="profilePicToggle"
+                 src="{{ user_status.user_profile.url }}"
+                 alt="User Profile"
+                 style="margin:0; border:none;">
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Member since -->
+     
+    <div class="member-card" style="backdrop-filter: blur(2px)">
+        <h3>Member Since</h3>
+        <p>{{ request.user.date_joined.year }}/{{ request.user.date_joined.month }}/{{ request.user.date_joined.day }}</p>
+      {% if user_status.is_VIP %}
+        <div class="modal vip" style="background: none; border:none; padding:0; box-shadow:none; margin-top:5px;margin-left:3px;">
+        <span class="modal-level">VIP User</span></div>
+    {% endif %}
+    </div>
+
+    <div class="vip-divider"></div>
+
+  </div>
+</div>
 
 <div class="dropdown-divider"></div>
 
-<div class="header-title" style="text-align: center; font-size:20px;margin-top:10px">Created Characters</div>
-<div class="characters-list">        
+{% if user_status.is_VIP %}
+<script>
+(function() {
+  const canvas = document.getElementById('vip-particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const section = canvas.parentElement;
+
+  function resize() {
+    canvas.width = section.offsetWidth;
+    canvas.height = section.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = Array.from({ length: 55 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.5 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -Math.random() * 0.5 - 0.1,
+    alpha: Math.random() * 0.7 + 0.2,
+    color: Math.random() > 0.5
+      ? `rgba(${180 + Math.random()*40|0}, ${100 + Math.random()*50|0}, 255,`
+      : `rgba(255, ${180 + Math.random()*40|0}, ${40 + Math.random()*30|0},`
+  }));
+
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
+      if (p.x < -5) p.x = canvas.width + 5;
+      if (p.x > canvas.width + 5) p.x = -5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + p.alpha + ')';
+      ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+{% endif %}
+
+              <div class="vip-profile-section {{ user_status.user_theme }}">
+                {% if no_characters %}
+                    <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 59vh;">
+                        <h3 class="header-title" style="margin-top:40px;">This user haven't made any characters yet</h3>
+                    </div>
+                {% else %}
+                    <br><div class="header-title" style="text-align: center; font-size:20px; ">Created Characters</div>
+                {% endif %}
+                <div class="characters-list" id="character-list">        
                     {% for character in characters %}
                             <div class="character-card">
                                 <div class="character-card-inner">
@@ -116,4 +171,11 @@
                             </div>
                 {% endfor %}
                 </div>
+              </div>
+{% else %}
+  <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 85vh;">
+    <h3 class="header-title">User not found</h3>
+    <input type="submit" value="Back to home page" onclick="window.location.href='/';">
+  </div>
+{% endif %}
 {% endblock %}

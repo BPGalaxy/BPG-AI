@@ -296,24 +296,59 @@ def userpage(request):
         return redirect("login")
     return render(request, "userdashbord.html", {"user_status":user_status, "customization":customization, "request":request.user.is_authenticated})
 
-def userprofile(request):
+def userprofile(request, username):
     if not request.user.is_authenticated:
         ms.error(request, "Not logged in")
         return redirect("homepage")
 
+    UserNotFound = False
+    try:
+        user_status = Status.objects.get(accountid=username)
+        characters = Characters.objects.all().filter(accountid=username, is_public=True, is_deleted=False)
+        checkDeletedList = []
+
+        for character in characters:
+            checkDeletedList.append(character.is_deleted)
+        checkDeleted = all(checkDeletedList)
+
+        if user_status.is_banned:
+            return render(request, "Banned.html")
+        
+        no_characters = False
+        if not characters.exists():
+            no_characters = True
+    except:
+        user_status = None
+        characters = None
+        checkDeleted = None
+        no_characters = None
+        UserNotFound = True
+
+    return render(request, "userprofile.html", {'characters': characters, "user_status":user_status, "checkDeleted":checkDeleted, "no_characters":no_characters, "UserNotFound":UserNotFound})
+
+@csrf_exempt
+def changetheme(request):
+    if not request.user.is_authenticated:
+        ms.error(request, "Not logged in")
+        return redirect("homepage")
+    
     user_status = Status.objects.get(accountid=request.user)
     if user_status.is_banned:
-        return render(request, "Banned.html")
+            return render(request, "Banned.html")
     
-    characters = Characters.objects.all().filter(accountid=request.user, is_deleted=False)
-    user_status = Status.objects.get(accountid=request.user)
-    checkDeletedList = []
+    if not user_status.is_VIP:
+        return redirect("userpage")
+    
+    theme = request.POST.get('theme', 'purple')
+    allowed = ['purple','blue','emerald','crimson','gold','teal','rose',
+               'indigo','cyan','amber','violet','copper','sakura','forest','midnight','slate']
+    if theme not in allowed:
+        theme = 'purple'
 
-    for character in characters:
-        checkDeletedList.append(character.is_deleted)
-    checkDeleted = all(checkDeletedList)
-
-    return render(request, "userprofile.html", {'characters': characters, "user_status":user_status, "checkDeleted":checkDeleted})
+    user_status.user_theme = theme
+    user_status.save()
+    ms.success(request, "Your profile theme updated successfully")
+    return redirect("userpage")
 
 @csrf_exempt
 def handle_text(request):
@@ -519,20 +554,24 @@ def chats(request):
 
     if chat_id != "None":
         chats = Chats.objects.get(chatid=chat_id)
+
         if chats.is_deleted:
             ms.error(request, "Chat not found")
             return redirect("chats")
+        
         is_limit = False
         if int(Status.objects.get(accountid=request.user).remaining_messages) == 0:
             is_limit = True
+
         CharacterID = Chats.objects.get(chatid=chat_id).CharacterID
         Character = Characters.objects.get(id=CharacterID) if CharacterID else None
+
         creator_status = None
         if not Character is None:
             creator_status = Status.objects.get(accountid=Character.accountid)
         return render(request, "chats/chatpage.html",
-                  {"messagess": messagess, "Character":Character, "chatname":chats.chatname, "chat_id": chat_id, "chat_count": chat_count,
-                   "last_ai_message": last_ai_message, "avatar":chats.avatar, "last_user_message": last_user_message, "is_limit":is_limit,
+                  {"messagess": messagess, "Character":Character, "chat":chats, "chat_id": chat_id, "chat_count": chat_count,
+                   "last_ai_message": last_ai_message, "last_user_message": last_user_message, "is_limit":is_limit,
                    "last_ai_message_id": last_ai_message_id, "username": request.user.username, "user_status":user_status, "creator_status":creator_status})
 
     else:

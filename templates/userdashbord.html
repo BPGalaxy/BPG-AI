@@ -2,6 +2,7 @@
 
 {% block style %}
     {% include 'static/css/base.style.css' %}
+    {% include 'static/css/vip-themes.css' %}
     {% include 'static/css/forms.style.css' %}
     {% include 'static/css/theme-toggle-btn.css' %}
 {% endblock %}
@@ -37,7 +38,7 @@
                 </div>
     <div class="page-title"></div>
     {% if user_status.is_VIP %}
-            <div style="margin-top:71px;"></div>
+            <div style="margin-top:-10px;"></div>
                 <div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="SetMenu">
                     <span class="pill badge-vip" style="margin-bottom:6px; cursor:default;"><span class="inner">♦ VIP</span></span>
                     <form action="{% url 'get_instructions' %}" method="POST">
@@ -69,29 +70,160 @@
                   </div>
                 </div>
         {% endif %}
-<!-- Avatar -->
-<div class="avatar-wrapper">
-  <div style="position:relative; display:inline-block;">
-    <div class="avatar-circle">
-      {% if user_status.user_profile == "" or user_status.user_profile == None %}
-        <div class="avatar-placeholder" id="avatar-preview">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-            <circle cx="50" cy="35" r="18" fill="var(--clr-purple-muted)" opacity="0.6"/>
-            <ellipse cx="50" cy="80" rx="28" ry="22" fill="var(--clr-purple-muted)" opacity="0.6"/>
-          </svg>
-        </div>
-      {% else %}
-        <img class="avatar profile-pic-toggle" id="profilePicToggle"  src="{{ user_status.user_profile.url }}" alt="User Profile" class="profile-picture">
+
+<div class="vip-profile-section {{ user_status.user_theme }}">
+
+  {% if user_status.is_VIP %}
+    <canvas id="vip-particles"></canvas>
+  {% endif %}
+
+  <div class="vip-content">
+
+    <!-- Name + VIP badge -->
+    <div class="vip-name-row">
+      <div class="header-title">{{ user_status.accountid }}</div>
+      {% if user_status.is_VIP %}
+        <span class="pill badge-vip"><span class="inner">♦ VIP</span></span>
       {% endif %}
+    </div>
+
+    <!-- Stars (VIP only) -->
+    {% if user_status.is_VIP %}
+      <div class="vip-stars">
+        <span class="star" style="--d:1.4s; --delay:0s">★</span>
+        <span class="star" style="--d:1.8s; --delay:0.3s">★</span>
+        <span class="star" style="--d:1.3s; --delay:0.6s">★</span>
+        <span class="star" style="--d:2s;   --delay:0.2s">★</span>
+        <span class="star" style="--d:1.6s; --delay:0.5s">★</span>
+      </div>
+    {% endif %}
+
+    <!-- Avatar -->
+    <div class="avatar-wrapper" style="margin-top: 10px;">
+      <div class="avatar-outer">
+        {% if user_status.is_VIP %}
+          <div class="crown">👑</div>
+          <div class="avatar-glow"></div>
+          <div class="avatar-ring"></div>
+        {% endif %}
+        <div class="avatar-circle" style="border:3px solid var(--theme-border);">
+          {% if user_status.user_profile == "" or user_status.user_profile == None %}
+            <div class="avatar-placeholder" id="avatar-preview">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+                <circle cx="50" cy="35" r="18" fill="var(--clr-purple-muted)" opacity="0.6"/>
+                <ellipse cx="50" cy="80" rx="28" ry="22" fill="var(--clr-purple-muted)" opacity="0.6"/>
+              </svg>
+            </div>
+          {% else %}
+            <img class="avatar profile-pic-toggle" id="profilePicToggle"
+                 src="{{ user_status.user_profile.url }}"
+                 alt="User Profile"
+                 style="margin:0; border:none;">
+          {% endif %}
+          
+        </div>
+      </div>
+      
     </div>
     <div class="camera-btn" id="camera-btn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-10.5h-1.8l-1.4-1.5H8.2L6.8 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
       </svg>
     </div>
+
+    <!-- ══ THEME PICKER TOGGLE BUTTON ══ -->
+    {% if user_status.is_VIP %}
+    <button id="theme-toggle-btn2" onclick="document.getElementById('theme-picker').classList.toggle('open')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)' "style="margin-bottom:10px;">
+      🎨 Profile Theme
+    </button>
+   
+  <!-- ══ THEME PICKER PANEL ══ -->
+  <div id="theme-picker">
+    <div style="max-width:600px; margin:0 auto;">
+
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <span style="font-family:'Cinzel',serif; color:#d4b4ff; font-size:14px; letter-spacing:3px;">✦ CHOOSE THEME</span>
+        <button onclick="document.getElementById('theme-picker').classList.remove('open')" style="background:none; border:none; color:#9070d0; font-size:20px; cursor:pointer; line-height:1;">✕</button>
+      </div>
+
+      <!-- Theme grid -->
+      <div id="theme-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-bottom:24px;"></div>
+
+      <!-- Select theme POST button -->
+      <form method="post" action="/changetheme/" style="text-align:center;">
+        {% csrf_token %}
+        <input type="hidden" name="theme" id="selected-theme-input" value="purple">
+        <button type="submit" style="
+          background:linear-gradient(135deg,#3a2800,#7a5500,#3a2800);
+          border:1px solid #c9960a; color:#ffd040;
+          font-family:'Cinzel',serif; font-size:12px; letter-spacing:2px;
+          padding:12px 36px; border-radius:24px; cursor:pointer;
+          box-shadow:0 0 16px rgba(200,150,0,0.3);
+          transition:all 0.2s;
+        " onmouseover="this.style.boxShadow='0 0 24px rgba(200,150,0,0.6)'"
+          onmouseout="this.style.boxShadow='0 0 16px rgba(200,150,0,0.3)'">
+          ✦ SELECT THEME
+        </button>
+      </form>
+    </div>
+  </div>
+ {% endif %}
+<script>
+(function () {
+  const themes = [
+    { name: 'purple',   dot: 'radial-gradient(circle,#9060e0,#1a0d3a)',   label: 'Purple'   },
+    { name: 'blue',     dot: 'radial-gradient(circle,#4080e0,#0d1a3a)',   label: 'Blue'     },
+    { name: 'emerald',  dot: 'radial-gradient(circle,#40c070,#0d3a1e)',   label: 'Emerald'  },
+    { name: 'crimson',  dot: 'radial-gradient(circle,#e04060,#3a0d0d)',   label: 'Crimson'  },
+    { name: 'gold',     dot: 'radial-gradient(circle,#d4a840,#2a1f05)',   label: 'Gold'     },
+    { name: 'teal',     dot: 'radial-gradient(circle,#40c8c0,#0d3a35)',   label: 'Teal'     },
+    { name: 'rose',     dot: 'radial-gradient(circle,#e060a0,#3a0d22)',   label: 'Rose'     },
+    { name: 'indigo',   dot: 'radial-gradient(circle,#6070e0,#111a4a)',   label: 'Indigo'   },
+    { name: 'cyan',     dot: 'radial-gradient(circle,#40d8f0,#0d2e3a)',   label: 'Cyan'     },
+    { name: 'amber',    dot: 'radial-gradient(circle,#e0a840,#2a1a05)',   label: 'Amber'    },
+    { name: 'violet',   dot: 'radial-gradient(circle,#c060f0,#220d3a)',   label: 'Violet'   },
+    { name: 'copper',   dot: 'radial-gradient(circle,#d08060,#2a1508)',   label: 'Copper'   },
+    { name: 'sakura',   dot: 'radial-gradient(circle,#f080b8,#3a0d1e)',   label: 'Sakura'   },
+    { name: 'forest',   dot: 'radial-gradient(circle,#60c050,#0d2e16)',   label: 'Forest'   },
+    { name: 'midnight', dot: 'radial-gradient(circle,#6070c0,#0a0a1e)',   label: 'Midnight' },
+    { name: 'slate',    dot: 'radial-gradient(circle,#8090b0,#161e2a)',   label: 'Slate'    },
+  ];
+
+  // Read saved theme from cookie (set by Django on load ideally, fallback purple)
+  let active = "{{ user_status.user_theme|default:'' }}" || "purple";
+
+  const section   = document.querySelector('.vip-profile-section');
+  const input     = document.getElementById('selected-theme-input');
+  const grid      = document.getElementById('theme-grid');
+
+  function applyTheme(name) {
+    // Remove all theme classes, add new one
+    themes.forEach(t => section.classList.remove(t.name));
+    section.classList.add(name);
+    active = name;
+    input.value = name;
+    // Update active swatch
+    document.querySelectorAll('.theme-swatch').forEach(el => {
+      el.classList.toggle('active', el.dataset.theme === name);
+    });
+    // Persist locally
+    document.cookie = `vip_theme=${name}; path=/; max-age=31536000`;
+  }
+
+  // Build swatches
+  themes.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'theme-swatch' + (t.name === active ? ' active' : '');
+    el.dataset.theme = t.name;
+    el.innerHTML = `<div class="swatch-dot" style="background:${t.dot};"></div><span style="color:#a090c0;">${t.label}</span>`;
+    el.onclick = () => applyTheme(t.name);
+    grid.appendChild(el);
+  });
+})();
+</script>
   </div>
 </div>
-
 <div class="messagebox-div" id="crop-overlay">
   <div id="crop-area">
     <img id="crop-img" draggable="false" />
@@ -438,4 +570,46 @@ const SetBtn = document.getElementById("SetBtn");
             InterestsInput.value = _decode("{{customization.Interests}}");
         });
     }
+  (function() {
+  const canvas = document.getElementById('vip-particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const section = canvas.parentElement;
+
+  function resize() {
+    canvas.width = section.offsetWidth;
+    canvas.height = section.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = Array.from({ length: 55 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.5 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -Math.random() * 0.5 - 0.1,
+    alpha: Math.random() * 0.7 + 0.2,
+    color: Math.random() > 0.5
+      ? `rgba(${180 + Math.random()*40|0}, ${100 + Math.random()*50|0}, 255,`
+      : `rgba(255, ${180 + Math.random()*40|0}, ${40 + Math.random()*30|0},`
+  }));
+
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
+      if (p.x < -5) p.x = canvas.width + 5;
+      if (p.x > canvas.width + 5) p.x = -5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + p.alpha + ')';
+      ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
 {% endblock %}

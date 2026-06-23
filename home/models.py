@@ -22,6 +22,7 @@ class Status(models.Model):
     currentchat = models.TextField(default="none")
     remaining_messages = models.IntegerField(default=100)
     user_profile = models.ImageField(blank=True, null=True, upload_to="user_profiles/")
+    user_theme = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.accountid
