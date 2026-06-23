@@ -340,8 +340,8 @@ def changetheme(request):
         return redirect("userpage")
     
     theme = request.POST.get('theme', 'purple')
-    allowed = ['purple','blue','emerald','crimson','gold','teal','rose',
-               'indigo','cyan','amber','violet','copper','sakura','forest','midnight','slate']
+    allowed = ['default','blue','emerald','crimson','gold','teal','rose',
+               'indigo','cyan','amber','violet','copper','forest','midnight','slate','black']
     if theme not in allowed:
         theme = 'purple'
 

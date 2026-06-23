@@ -106,7 +106,7 @@
           <div class="avatar-glow"></div>
           <div class="avatar-ring"></div>
         {% endif %}
-        <div class="avatar-circle" style="border:3px solid var(--theme-border);">
+        <div class="avatar-circle" style="border:3px solid var(--theme-badge-border);">
           {% if user_status.user_profile == "" or user_status.user_profile == None %}
             <div class="avatar-placeholder" id="avatar-preview">
               <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
@@ -172,7 +172,7 @@
 <script>
 (function () {
   const themes = [
-    { name: 'purple',   dot: 'radial-gradient(circle,#9060e0,#1a0d3a)',   label: 'Purple'   },
+    { name: 'default',   dot: 'radial-gradient(circle,#9060e0,#1a0d3a)',   label: 'Default'   },
     { name: 'blue',     dot: 'radial-gradient(circle,#4080e0,#0d1a3a)',   label: 'Blue'     },
     { name: 'emerald',  dot: 'radial-gradient(circle,#40c070,#0d3a1e)',   label: 'Emerald'  },
     { name: 'crimson',  dot: 'radial-gradient(circle,#e04060,#3a0d0d)',   label: 'Crimson'  },
@@ -184,12 +184,11 @@
     { name: 'amber',    dot: 'radial-gradient(circle,#e0a840,#2a1a05)',   label: 'Amber'    },
     { name: 'violet',   dot: 'radial-gradient(circle,#c060f0,#220d3a)',   label: 'Violet'   },
     { name: 'copper',   dot: 'radial-gradient(circle,#d08060,#2a1508)',   label: 'Copper'   },
-    { name: 'sakura',   dot: 'radial-gradient(circle,#f080b8,#3a0d1e)',   label: 'Sakura'   },
     { name: 'forest',   dot: 'radial-gradient(circle,#60c050,#0d2e16)',   label: 'Forest'   },
     { name: 'midnight', dot: 'radial-gradient(circle,#6070c0,#0a0a1e)',   label: 'Midnight' },
     { name: 'slate',    dot: 'radial-gradient(circle,#8090b0,#161e2a)',   label: 'Slate'    },
+    { name: 'black',    dot: 'radial-gradient(circle,#272727,#050505)',   label: 'Black'    },
   ];
-
   // Read saved theme from cookie (set by Django on load ideally, fallback purple)
   let active = "{{ user_status.user_theme|default:'' }}" || "purple";
 
