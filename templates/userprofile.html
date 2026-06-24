@@ -88,7 +88,7 @@
   </div>
 </div>
 
-<div class="dropdown-divider"></div>
+<div class="dropdown-divider" id="dropdown-divider"></div>
 
               <div class="vip-profile-section {{ user_status.user_theme }}">
                 {% if no_characters %}
@@ -193,7 +193,45 @@
 })();
 document.getElementById('upper-balance').classList.add("vip-profile-section");
 document.getElementById('upper-balance').classList.add("{{ user_status.user_theme }}");
-document.getElementById('upper-balance').style.backgroundColor = 'var(--theme-accent)';
+document.getElementById('bottom-bar').classList.add("vip-profile-section");
+document.getElementById('bottom-bar').classList.add("{{ user_status.user_theme }}");
+document.getElementById('bottom-bar').style.border = 'var(--theme-shimmer)';
+document.getElementById('bottom-bar').style.boxShadow = '0 0px 10px var(--theme-glow), inset 0 1px 0 var(--theme-glow)';
+document.getElementById('bodye').classList.add("vip-profile-section");
+document.getElementById('bodye').classList.add("{{ user_status.user_theme }}");
+document.getElementById('parent-container').style.boxShadow = "-20px 0 10px -10px var(--theme-shimmer), 20px 0 10px -10px var(--theme-shimmer)";
+document.getElementById('site-header').style.background = 'var(--theme-shimmer)';
+document.getElementById('site-header').style.border = 'var(--theme-shimmer)';
+document.getElementById('dropdown-divider').style.borderTop = '1px solid var(--theme-shimmer)';
+document.getElementById('site-header').style.boxShadow = '0 0px 10px var(--theme-glow), inset 0 1px 0 var(--theme-glow)';
 
+const cards = document.getElementsByClassName('character-card');
+const cards2 = document.getElementsByClassName('character-info');
+const names = document.getElementsByClassName('character-name');
+const btns = document.getElementsByClassName('start-conversation-btn');
+const navBtns = document.getElementsByClassName('navBtn');
 
+for (const card of cards) {
+    card.style.background = "var(--theme-card-bg)";
+    card.style.border = "1px solid var(--theme-shimmer)";
+    card.style.boxShadow = "    0 4px 16px rgba(0, 0, 0, 0.3), 0 0 10px var(--theme-glow)";
+};
+for (const card of cards2) {
+    card.style.background = "var(--theme-card-bg)";
+};
+for (const name of names) {
+    name.style.color = "var(--theme-accent)";
+};
+for (const navBtn of navBtns) {
+    navBtn.style.fill = "var(--theme-accent)";
+};
+for (const btn of btns) {
+    btn.style.color = "var(--theme-accent-dim)";
+    btn.addEventListener("mouseenter", () => {
+      btn.style.boxShadow = "0 6px 20px var(--theme-glow), 0 0 15px var(--theme-glow)";
+    });
+    btn.addEventListener("mouseleave", () => {
+      btn.style.boxShadow = "0 6px 9px var(--theme-glow), 0 0 5px var(--theme-glow)";
+    });
+}
 {% endblock %}

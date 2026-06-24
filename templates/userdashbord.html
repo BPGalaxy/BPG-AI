@@ -132,13 +132,13 @@
     <div style="display:flex">
       <div class="camera-btn" id="camera-btn" style="margin-top: -15px; margin-right:5px;">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-10.5h-1.8l-1.4-1.5H8.2L6.8 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
+          <path fill="var(--theme-accent)" d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-10.5h-1.8l-1.4-1.5H8.2L6.8 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
         </svg>
       </div>
       {% if not user_status.user_profile == "" or user_status.user_profile == notNone %}
       <div class="camera-btn" id="profile-delete-btn" style="margin-top: -15px; margin-left:5px;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-          <path fill="rgb(215, 201, 255)" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z"/>
+          <path fill="var(--theme-accent)" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z"/>
         </svg>
       </div>
       {% endif %}
@@ -192,7 +192,6 @@
     { name: 'gold',     dot: 'radial-gradient(circle,#d4a840,#2a1f05)',   label: 'Gold'     },
     { name: 'teal',     dot: 'radial-gradient(circle,#40c8c0,#0d3a35)',   label: 'Teal'     },
     { name: 'rose',     dot: 'radial-gradient(circle,#e060a0,#3a0d22)',   label: 'Rose'     },
-    { name: 'indigo',   dot: 'radial-gradient(circle,#6070e0,#111a4a)',   label: 'Indigo'   },
     { name: 'cyan',     dot: 'radial-gradient(circle,#40d8f0,#0d2e3a)',   label: 'Cyan'     },
     { name: 'amber',    dot: 'radial-gradient(circle,#e0a840,#2a1a05)',   label: 'Amber'    },
     { name: 'violet',   dot: 'radial-gradient(circle,#c060f0,#220d3a)',   label: 'Violet'   },
@@ -201,6 +200,17 @@
     { name: 'midnight', dot: 'radial-gradient(circle,#6070c0,#0a0a1e)',   label: 'Midnight' },
     { name: 'slate',    dot: 'radial-gradient(circle,#8090b0,#161e2a)',   label: 'Slate'    },
     { name: 'black',    dot: 'radial-gradient(circle,#272727,#050505)',   label: 'Black'    },
+    { name: 'aurora',   dot: 'radial-gradient(circle,#40e8d0,#0d2a2e)',   label: 'Aurora'   },
+    { name: 'inferno',  dot: 'radial-gradient(circle,#ff6020,#2a0e00)',   label: 'Inferno'  },
+    { name: 'neon',     dot: 'radial-gradient(circle,#f040c0,#1a0a20)',   label: 'Neon'     },
+    { name: 'toxic',    dot: 'radial-gradient(circle,#a0ff20,#0e1e02)',   label: 'Toxic'    },
+    { name: 'dusk',     dot: 'radial-gradient(circle,#f09030,#200a00)',   label: 'Dusk'     },
+    { name: 'nebula',   dot: 'radial-gradient(circle,#e060d0,#1a0828)',   label: 'Nebula'   },
+    { name: 'sunset',   dot: 'radial-gradient(circle,#ffb840,#28100a)',   label: 'Sunset'   },
+    { name: 'ocean',    dot: 'radial-gradient(circle,#2090e0,#041828)',   label: 'Ocean'    },
+    { name: 'blackgold', dot: 'radial-gradient(circle,#ffd040,#181000)', label: 'Black Gold' },
+    { name: 'kitty', dot: 'radial-gradient(circle,#ffb0d0,#2a0a18)', label: '🐱 Kitty' },
+    
   ];
   // Read saved theme from cookie (set by Django on load ideally, fallback purple)
   let active = "{{ user_status.user_theme|default:'' }}" || "purple";

@@ -342,7 +342,9 @@ def changetheme(request):
     
     theme = request.POST.get('theme', 'purple')
     allowed = ['default','blue','emerald','crimson','gold','teal','rose',
-               'indigo','cyan','amber','violet','copper','forest','midnight','slate','black']
+           'cyan','amber','violet','copper','sakura','forest','midnight','slate',
+           'aurora','inferno','neon','toxic','dusk','nebula','venom','sunset','ocean',
+           'blackgold','kitty']
     if theme not in allowed:
         theme = 'purple'
 
