@@ -19,6 +19,17 @@
     <input type="submit" class="delinput" value="NO, Go Back" style="background: #300a0a; color:#ffe5e5" id="DelAccCloseBtn"/>
 </div>
 
+{% if not user_status.user_profile == "" or not user_status.user_profile == None %}
+  <div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="profile-delete-menu">
+      <h2 >Are you sure you want to delete your profile picture?</h2>
+      <form action="{% url 'delete_profile' %}" method="POST">
+          {% csrf_token %}
+        <input type="submit"  value="YES, Delete" id="ProfileDelete"/>
+        <input type="button" value="NO, Go Back" id="CancelDelete"/>
+      </form>
+  </div>
+{% endif %}
+
 <div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102; background: #5c1212bb" id="DelAcceptMenu">
     <button class="messagebox-close-btn" id="DelAccCloseBtn2">&times;</button>
     <form action="{% url 'delete_account' %}" method="POST">
@@ -29,13 +40,6 @@
     </form>
 </div>
 
-<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
-                  <div class="modal" id="modal">
-                    <div class="modal-icon" id="modal-icon"></div>
-                    <p class="modal-text"  id="modal-text"></p>
-                    <button class="modal-close" onclick="closeModal()"><span class="btn-inner">Got it</span></button>
-                  </div>
-                </div>
     <div class="page-title"></div>
     {% if user_status.is_VIP %}
             <div style="margin-top:-10px;"></div>
@@ -58,7 +62,6 @@
                     </form>
                 </div>
         {% else %}
-            <div style="margin-top:71px;"></div>
                 <div class="overlay" id="SetMenu">
                   <div class="modal vip" id="modal">
                     <div class="modal-icon" id="modal-icon">♦</div>
@@ -106,7 +109,7 @@
           <div class="avatar-glow"></div>
           <div class="avatar-ring"></div>
         {% endif %}
-        <div class="avatar-circle" style="border:3px solid var(--theme-badge-border);">
+        <div class="avatar-circle"{% if user_status.is_VIP %}style="border:3px solid var(--theme-badge-border);{% endif %}">
           {% if user_status.user_profile == "" or user_status.user_profile == None %}
             <div class="avatar-placeholder" id="avatar-preview">
               <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
@@ -125,10 +128,20 @@
       </div>
       
     </div>
-    <div class="camera-btn" id="camera-btn">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-10.5h-1.8l-1.4-1.5H8.2L6.8 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
-      </svg>
+
+    <div style="display:flex">
+      <div class="camera-btn" id="camera-btn" style="margin-top: -15px; margin-right:5px;">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-10.5h-1.8l-1.4-1.5H8.2L6.8 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
+        </svg>
+      </div>
+      {% if not user_status.user_profile == "" or user_status.user_profile == notNone %}
+      <div class="camera-btn" id="profile-delete-btn" style="margin-top: -15px; margin-left:5px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path fill="rgb(215, 201, 255)" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z"/>
+        </svg>
+      </div>
+      {% endif %}
     </div>
 
     <!-- ══ THEME PICKER TOGGLE BUTTON ══ -->
@@ -208,6 +221,8 @@
     });
     // Persist locally
     document.cookie = `vip_theme=${name}; path=/; max-age=31536000`;
+    if (window.rebuildParticles) window.rebuildParticles();
+
   }
 
   // Build swatches
@@ -292,7 +307,7 @@
     </div>
     {% if not user_status.is_VIP %}
       <div class="row-right">
-        <button class="premium-btn">Get Premium</button>
+        <button class="premium-btn" onclick="showModal('notvip')">Get Premium</button>
       </div>
     {% else %}
       <span class="pill badge-vip" style="margin-bottom:3px;"><span class="inner">♦ VIP</span></span>
@@ -541,7 +556,23 @@ saveBtn.addEventListener('click', () => {
 
 cancelBtn.addEventListener('click', () => overlay.classList.remove('open'));
 
-const SetBtn = document.getElementById("SetBtn");
+    const ProfileDeleteBtn = document.getElementById("profile-delete-btn");
+    const ProfileDeleteMenu = document.getElementById("profile-delete-menu");
+    const CancelDelete = document.getElementById("CancelDelete");
+
+    if (ProfileDeleteMenu && ProfileDeleteMenu) {
+        ProfileDeleteBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = ProfileDeleteMenu.classList.contains("open");
+            closeAllMenus();
+            if (!isOpen) ProfileDeleteMenu.classList.add("open");
+        });}
+    CancelDelete.addEventListener("click", (e) => {
+            e.stopPropagation();
+            ProfileDeleteMenu && ProfileDeleteMenu.classList.remove("open");
+        });
+
+    const SetBtn = document.getElementById("SetBtn");
     const SetMenu = document.getElementById("SetMenu");
     const SetCloseBtn = document.getElementById("set-close-btn");
 
@@ -569,7 +600,7 @@ const SetBtn = document.getElementById("SetBtn");
             InterestsInput.value = _decode("{{customization.Interests}}");
         });
     }
-  (function() {
+  (function () {
   const canvas = document.getElementById('vip-particles');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -582,17 +613,28 @@ const SetBtn = document.getElementById("SetBtn");
   resize();
   window.addEventListener('resize', resize);
 
-  const particles = Array.from({ length: 55 }, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 1.5 + 0.3,
-    vx: (Math.random() - 0.5) * 0.3,
-    vy: -Math.random() * 0.5 - 0.1,
-    alpha: Math.random() * 0.7 + 0.2,
-    color: Math.random() > 0.5
-      ? `rgba(${180 + Math.random()*40|0}, ${100 + Math.random()*50|0}, 255,`
-      : `rgba(255, ${180 + Math.random()*40|0}, ${40 + Math.random()*30|0},`
-  }));
+  let particles = [];
+
+  function buildParticles() {
+    // Read AFTER theme class is already on the element
+    const style = getComputedStyle(section);
+    const rawA = style.getPropertyValue('--theme-particle-a').trim();
+    const rawB = style.getPropertyValue('--theme-particle-b').trim();
+
+    // Fallback to purple/gold if variables missing
+    const colorA = rawA || '180,120,255';
+    const colorB = rawB || '255,180,40';
+
+    particles = Array.from({ length: 55 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -Math.random() * 0.5 - 0.1,
+      alpha: Math.random() * 0.7 + 0.2,
+      color: Math.random() > 0.5 ? `rgba(${colorA},` : `rgba(${colorB},`
+    }));
+  }
 
   function tick() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -609,6 +651,12 @@ const SetBtn = document.getElementById("SetBtn");
     });
     requestAnimationFrame(tick);
   }
+
+  // Expose so applyTheme() can call it
+  window.rebuildParticles = buildParticles;
+
+  buildParticles();
   tick();
 })();
+
 {% endblock %}

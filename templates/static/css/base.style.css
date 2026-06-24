@@ -1248,8 +1248,13 @@ body {
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 0 10px var(--theme-glow);
+    transition: all 0.3s ease;
   }
- 
+  
+  .camera-btn:hover{
+    transform: translateY(-2px);
+  }
+
   .camera-btn svg {
     width: 18px;
     height: 18px;
@@ -1392,3 +1397,5 @@ body {
   .crop-actions button.primary { font-weight:600; border-color:var(--clr-purple, #7F77DD); }
   .crop-actions button:hover { background:rgba(255,255,255,0.05); }
   .crop-hint { font-size:12px; color:#888; margin-top:8px; }
+
+  

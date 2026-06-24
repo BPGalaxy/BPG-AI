@@ -69,7 +69,8 @@ def stream_chat(request, user_message, system_message, chat_id):
             "model": model,
             "messages": [
                 {"role":"system", "content":system_message},
-                {"role": "user", "content": '\nLast user message: ' + user_message}
+                {"role": "user", "content": '\nLast user message: ' + user_message+"- Your responses don't have to exceed 100 words.\n"
+                                            '- never include "ai message:" at the start of your response.'}
             ],
             "stream": True
         }
@@ -350,6 +351,21 @@ def changetheme(request):
     ms.success(request, "Your profile theme updated successfully")
     return redirect("userpage")
 
+def delete_profile(request):
+    if not request.user.is_authenticated:
+        ms.error(request, "Not logged in")
+        return redirect("homepage")
+    
+    user_status = Status.objects.get(accountid=request.user)
+    if user_status.is_banned:
+            return render(request, "Banned.html")
+    
+    if user_status.user_profile:
+        user_status.user_profile.delete()
+        user_status.save()
+        ms.info(request,"Profile picture deleted.")
+    
+    return redirect("userpage")
 @csrf_exempt
 def handle_text(request):
     try:

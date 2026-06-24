@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BPG RP (Beta Ver)</title>
     <style>{% include 'static/css/base.style.css' %}</style>
+    <style>{% include 'static/css/vip-themes.css' %}</style>
     <style> {% include 'static/css/all.min.css' %}</style>
     <style> {% include 'static/css/google.fonts.css' %}</style>
     <style>
@@ -32,6 +33,13 @@
 </script>
 
 <body>
+    <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+                  <div class="modal" id="modal" style="max-width:600px;">
+                    <div class="modal-icon" id="modal-icon"></div>
+                    <p class="modal-text"  id="modal-text"></p>
+                    <button class="modal-close" onclick="closeModal()"><span class="btn-inner">Got it</span></button>
+                  </div>
+                </div>
 <div class="parent-container">
 <header>
     {% block header %}
@@ -83,7 +91,7 @@
       });
     </script>
 </header>
-    <div style="width:10px; margin-bottom:75px;"></div>
+    <div style="width:auto; padding-bottom:75px;" id="upper-balance"></div>
 {% include 'site_messages.html' %}
     {% block content %}
     {% endblock %}
@@ -266,16 +274,22 @@
         closeAllMenus();
     });
 
-{% include 'static/js/theme-switcher.js' %}
+{% if user_status.is_VIP %}
+    {% include 'static/js/theme-switcher.js' %}
+{% endif %}
   const config = {
     staff: { icon: '🔵', text: 'You have <span class="modal-level">Staff</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel" /><br></form></div>' },
     dev:   { icon: '🔴', text: 'You have <span class="modal-level">Developer</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/></form></div>' },
     owner: { icon: '✦',  text: 'You have <span class="modal-level">Owner</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger DATABASE WIPE"/></form></div>' },
-vip:   { icon: '♦',  text: 'You are a <span class="modal-level">VIP</span> user.<br> You have access to following features:<br><br><span class="modal-level">Customizing your AI responds with giving custom instructions to AI</span><br><div class="dropdown-divider" style="margin: 6px 0;  border-top: 1px solid #c89000;"></div><span class="modal-level">Creating and customizing your own roleplay character</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Respond prority in high traffic times</span><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Unlimited messages (No daily limit)</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Exclusive golden theme</span><br><button id="theme-toggle-btn" style="margin-top:5px;"><span class="btn-inner"></span></button>', buttons: '' },
-  };
+    vip:   { icon: '♦',  text: 'You are a <span class="modal-level">VIP</span> user.<br> You have access to following features:<br><br><span class="modal-level">Customizing your AI responds with giving custom instructions to AI</span><br><div class="dropdown-divider" style="margin: 6px 0;  border-top: 1px solid #c89000;"></div><span class="modal-level">Creating and customizing your own roleplay character</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Respond prority in high traffic times</span><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Unlimited messages (No daily limit)</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div> <span class="modal-level">Up to 15 exclusive colors to customize your profile look</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Exclusive golden theme</span><br><button id="theme-toggle-btn" style="margin-top:5px;"><span class="btn-inner"></span></button>', buttons: '' },
+    notvip:   { icon: '♦',  text: 'With <span class="modal-level">VIP</span> subscription.<br> You will have access to following features:<br><br><span class="modal-level">Customizing your AI responds with giving custom instructions to AI</span><br><div class="dropdown-divider" style="margin: 6px 0;  border-top: 1px solid #c89000;"></div><span class="modal-level">Creating and customizing your own roleplay character</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Respond prority in high traffic times</span><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Unlimited messages (No daily limit)</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div> <span class="modal-level">Up to 15 exclusive colors to customize your profile look</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Exclusive golden theme</span><br>', buttons: '' },
+    };
 
   function showModal(level) {
     const c = config[level];
+    if (level === 'notvip') {
+        level = 'vip';
+    }
     document.getElementById('modal-icon').textContent = c.icon;
     document.getElementById('modal-text').innerHTML   = c.text;
     document.getElementById('modal-text').innerHTML   += c.buttons;

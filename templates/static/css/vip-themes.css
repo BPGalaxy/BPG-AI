@@ -22,7 +22,7 @@
 .vip-profile-section.midnight{ background: radial-gradient(ellipse at center,#0a0a1e 0%,#060612 40%,#020206 100%); }
 .vip-profile-section.copper  { background: radial-gradient(ellipse at center,#2a1508 0%,#1c0d04 40%,#090401 100%); }
 .vip-profile-section.black   { background: radial-gradient(ellipse at center,rgb(30, 30, 30) 0%,rgb(15, 15, 15) 40%,rgb(6, 6, 6) 100%); }
-rgb(9, 9, 9)
+
 /* ACCENT OVERRIDES */
 .vip-profile-section.blue {
   --theme-accent:#90b8f0; --theme-accent-dim:#6090d0; --theme-glow:rgba(80,140,255,0.5);
@@ -363,6 +363,7 @@ rgb(9, 9, 9)
 
   /* Particle canvas */
   #vip-particles {
+    margin-top:75px;
     position: absolute;
     inset: 0;
     pointer-events: none;

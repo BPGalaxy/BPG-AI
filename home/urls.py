@@ -9,6 +9,7 @@ urlpatterns = [
     path("userpage/", views.userpage, name="userpage"),
     path("userprofile/<str:username>", views.userprofile, name="userprofile"),
     path("changetheme/", views.changetheme, name="changetheme"),
+    path("delete_profile/", views.delete_profile, name="delete_profile"),
     path("chats/copy_message/", views.copy_message, name="copy_message"),
     path("get_instructions/", views.get_instructions, name="get_instructions"),
     path("delete/", views.delete_chat, name="delete_chat"),
