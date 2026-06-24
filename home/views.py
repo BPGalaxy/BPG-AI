@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from .models import *
 from django.contrib import messages as ms
 from django.db.models import Case, When, Value
+from django.contrib.auth.models import User
 from .forms import CharacterPrompt
 from time import sleep
 from dotenv import load_dotenv
@@ -304,6 +305,7 @@ def userprofile(request, username):
 
     UserNotFound = False
     try:
+        date_joined = User.objects.get(username=username).date_joined
         user_status = Status.objects.get(accountid=username)
         characters = Characters.objects.all().filter(accountid=username, is_public=True, is_deleted=False)
         checkDeletedList = []
@@ -325,7 +327,7 @@ def userprofile(request, username):
         no_characters = None
         UserNotFound = True
 
-    return render(request, "userprofile.html", {'characters': characters, "user_status":user_status, "checkDeleted":checkDeleted, "no_characters":no_characters, "UserNotFound":UserNotFound})
+    return render(request, "userprofile.html", {'characters': characters, "user_status":user_status, "date_joined":date_joined, "checkDeleted":checkDeleted, "no_characters":no_characters, "UserNotFound":UserNotFound})
 
 @csrf_exempt
 def changetheme(request):
@@ -345,9 +347,16 @@ def changetheme(request):
            'cyan','amber','violet','copper','sakura','forest','midnight','slate',
            'aurora','inferno','neon','toxic','dusk','nebula','venom','sunset','ocean',
            'blackgold','kitty']
+    
     if theme not in allowed:
         theme = 'purple'
 
+    if user_status.user_theme == theme:
+        return redirect("userpage")
+    
+    if theme == "purple":
+        return redirect("userpage")
+    
     user_status.user_theme = theme
     user_status.save()
     ms.success(request, "Your profile theme updated successfully")
@@ -1000,7 +1009,7 @@ def public_status(request):
     character.save()
     return redirect("user_characters")
 
-def browse_characters(request):
+def browse(request):
     if not request.user.is_authenticated:
         ms.error(request, "Not logged in")
         return redirect("homepage")
@@ -1009,11 +1018,15 @@ def browse_characters(request):
     if is_banned:
         return render(request, "Banned.html")
     
+    search_type = request.GET.get("type", "characters")
+
     characters = Characters.objects.all().filter(is_public=True)
+    users = None
+    
     no_characters = False
     if not characters.exists():
         no_characters = True
-    return render(request, 'browse_characters.html', {'characters': characters, 'no_characters': no_characters})
+    return render(request, 'browse.html', {'characters': characters, 'no_characters': no_characters, "users":users, "search_type": search_type})
 
 @csrf_exempt
 def search_results(request):
@@ -1025,15 +1038,22 @@ def search_results(request):
     if is_banned:
         return render(request, "Banned.html")
     
-    if request.method != "POST":
+    if request.method != "GET":
         return render(request, "404.html")
-    user_search = request.POST.get('user_search', '')
+    user_search = request.GET.get('user_search', '')
+    search_type = request.GET.get('type', 'characters')
+
     characters = Characters.objects.filter(is_public=True, Name__icontains=user_search)
-            
+    if len(user_search) == 0:
+        users = None
+    elif len(user_search) < 3:
+        users = Status.objects.filter(is_banned=False, accountid__startswith=user_search)
+    else:
+        users = Status.objects.filter(is_banned=False, accountid__icontains=user_search)
     no_characters = False
     if not characters.exists():
         no_characters = True
-    return render(request, 'search_results.html', {'characters': characters, 'no_characters': no_characters})
+    return render(request, 'search_results.html', {'characters': characters, 'users':users, 'no_characters': no_characters, 'search_type':search_type})
 
 def delete_black_messages(request):
     chats = Chats.objects.all()
@@ -1055,8 +1075,9 @@ def test(request):
     Sta = Status.objects.get(accountid=request.user)
     Sta.Generate_status = False
     Sta.save()
-    chat_id = ""
+    
     ms.info(request, "Pinged 200")
+
     chats = Chats.objects.all()
     messages = Message.objects.all()
     chatids = []

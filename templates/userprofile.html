@@ -76,7 +76,7 @@
      
     <div class="member-card" style="backdrop-filter: blur(2px)">
         <h3>Member Since</h3>
-        <p>{{ request.user.date_joined.year }}/{{ request.user.date_joined.month }}/{{ request.user.date_joined.day }}</p>
+        <p>{{ date_joined.year }}/{{ date_joined.month }}/{{ date_joined.day }}</p>
       {% if user_status.is_VIP %}
         <div class="modal vip" style="background: none; border:none; padding:0; box-shadow:none; margin-top:5px;margin-left:3px;">
         <span class="modal-level">VIP User</span></div>

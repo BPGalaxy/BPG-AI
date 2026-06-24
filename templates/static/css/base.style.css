@@ -1248,6 +1248,7 @@ body {
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 0 10px var(--theme-glow);
+    backdrop-filter: blur(2px);
     transition: all 0.3s ease;
   }
   
