@@ -105,9 +105,9 @@
     <div class="avatar-wrapper" style="margin-top: 10px;">
       <div class="avatar-outer">
         {% if user_status.is_VIP %}
-          <div class="crown">👑</div>
+          <div class="crown">✦</div>
           <div class="avatar-glow"></div>
-          <div class="avatar-ring"></div>
+          <div class="avatar-ring" id="avatar-ring"></div>
         {% endif %}
         <div class="avatar-circle"{% if user_status.is_VIP %}style="border:3px solid var(--theme-badge-border);{% endif %}">
           {% if user_status.user_profile == "" or user_status.user_profile == None %}
@@ -189,11 +189,10 @@
     { name: 'blue',     dot: 'radial-gradient(circle,#4080e0,#0d1a3a)',   label: 'Blue'     },
     { name: 'emerald',  dot: 'radial-gradient(circle,#40c070,#0d3a1e)',   label: 'Emerald'  },
     { name: 'crimson',  dot: 'radial-gradient(circle,#e04060,#3a0d0d)',   label: 'Crimson'  },
-    { name: 'gold',     dot: 'radial-gradient(circle,#d4a840,#2a1f05)',   label: 'Gold'     },
+    { name: 'gold',     dot: 'radial-gradient(circle,#e0a840,#2a1a05)',   label: 'Gold'     },
     { name: 'teal',     dot: 'radial-gradient(circle,#40c8c0,#0d3a35)',   label: 'Teal'     },
     { name: 'rose',     dot: 'radial-gradient(circle,#e060a0,#3a0d22)',   label: 'Rose'     },
     { name: 'cyan',     dot: 'radial-gradient(circle,#40d8f0,#0d2e3a)',   label: 'Cyan'     },
-    { name: 'amber',    dot: 'radial-gradient(circle,#e0a840,#2a1a05)',   label: 'Amber'    },
     { name: 'violet',   dot: 'radial-gradient(circle,#c060f0,#220d3a)',   label: 'Violet'   },
     { name: 'copper',   dot: 'radial-gradient(circle,#d08060,#2a1508)',   label: 'Copper'   },
     { name: 'forest',   dot: 'radial-gradient(circle,#60c050,#0d2e16)',   label: 'Forest'   },
@@ -208,9 +207,12 @@
     { name: 'nebula',   dot: 'radial-gradient(circle,#e060d0,#1a0828)',   label: 'Nebula'   },
     { name: 'sunset',   dot: 'radial-gradient(circle,#ffb840,#28100a)',   label: 'Sunset'   },
     { name: 'ocean',    dot: 'radial-gradient(circle,#2090e0,#041828)',   label: 'Ocean'    },
-    { name: 'blackgold', dot: 'radial-gradient(circle,#ffd040,#181000)', label: 'Black Gold' },
-    { name: 'kitty', dot: 'radial-gradient(circle,#ffb0d0,#2a0a18)', label: '🐱 Kitty' },
-    
+    { name: 'kitty',    dot: 'radial-gradient(circle,#ff80c0,#ffe0f0)',   label: 'Kitty'    },
+    { name: 'cloud',    dot: 'radial-gradient(circle,#60b8f0,#e8f4ff)',   label: 'Cloud'    },
+    { name: 'matcha',   dot: 'radial-gradient(circle,#70c060,#eef5e8)',   label: 'Matcha'   },
+    { name: 'honey',    dot: 'radial-gradient(circle,#e0a800,#fff8e0)',   label: 'Honey'    },
+    { name: 'arctic',   dot: 'radial-gradient(circle,#30c898,#e8faf4)',   label: 'Arctic'   },
+    { name: 'lavender', dot: 'radial-gradient(circle,#9060d8,#f0e8ff)',   label: 'Lavender' },
   ];
   // Read saved theme from cookie (set by Django on load ideally, fallback purple)
   let active = "{{ user_status.user_theme|default:'' }}" || "purple";

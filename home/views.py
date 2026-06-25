@@ -344,9 +344,9 @@ def changetheme(request):
     
     theme = request.POST.get('theme', 'purple')
     allowed = ['default','blue','emerald','crimson','gold','teal','rose',
-           'cyan','amber','violet','copper','sakura','forest','midnight','slate',
+           'cyan','violet','copper','sakura','forest','midnight','slate', 'black',
            'aurora','inferno','neon','toxic','dusk','nebula','venom','sunset','ocean',
-           'blackgold','kitty']
+            'kitty', 'cloud', 'matcha', 'honey', 'arctic', 'lavender']
     
     if theme not in allowed:
         theme = 'purple'
@@ -1041,6 +1041,7 @@ def search_results(request):
     if request.method != "GET":
         return render(request, "404.html")
     user_search = request.GET.get('user_search', '')
+    user_search_length = len(user_search)
     search_type = request.GET.get('type', 'characters')
 
     from django.db.models import Case, When, IntegerField, Value
@@ -1080,7 +1081,7 @@ def search_results(request):
     no_characters = False
     if not characters.exists():
         no_characters = True
-    return render(request, 'search_results.html', {'characters': characters, 'users':users, 'no_characters': no_characters, 'search_type':search_type})
+    return render(request, 'search_results.html', {'characters': characters, 'users':users, 'no_characters': no_characters, 'search_type':search_type, 'user_search_length':user_search_length})
 
 def delete_black_messages(request):
     chats = Chats.objects.all()
