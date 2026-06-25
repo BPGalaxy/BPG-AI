@@ -22,7 +22,7 @@
                 <input type="submit" value="Make One" onclick="window.location.href='/create_character/';">
             </div>
         {% endif %}
-        <div class="characters-list">
+        <div class="characters-list" id="public_statuss">
             {% for character in characters %}
                     {% if not character.is_deleted %}
                         <div class="character-card">
@@ -40,14 +40,14 @@
                                     <h3 class="character-name">{{ character.Name }}</h3>
                                     <p>{{ character.Description }}</p>
 
-                                    <form method="POST" action="{% url 'public_status' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                    <form hx-post="/public_status/" hx-trigger="submit" hx-target="#public_statuss" hx-include="[name='character_id']" style="display: block; width: 100%; margin: 0; padding: 0;">
                                             {% csrf_token %}
                                             <input type="hidden" name="character_id" value="{{ character.id }}">
-                                            {% if character.is_public %}
-                                                <button class="delete-character-btn">Make It Private</button>
-                                            {% else %}
-                                                <button class="delete-character-btn green">Make It Public</button>
-                                            {% endif %}
+                                                {% if character.is_public %}
+                                                    <button class="delete-character-btn">Make It Private</button>
+                                                {% else %}
+                                                    <button class="delete-character-btn green">Make It Public</button>
+                                                {% endif %}
                                         </form>
 
                                     <form method="POST" action="{% url 'create_conversation' %}" style="display: block; width: 100%; margin: 0; padding: 0;">

@@ -49,9 +49,13 @@
 
             <div id="search_results">
                 {% if search_type == "characters" %}
+                    {% if no_characters %}
+                        <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 79.5vh;">
+                            <h3 class="header-title">No characters found</h3>
+                        </div>
+                    {% endif %}
                     <div class="characters-list" id="character-list">        
                         {% for character in characters %}
-                                
                                 <div class="character-card">
                                     <div class="character-card-inner">
                                         {% if character.ProfilePicture %}
@@ -77,7 +81,7 @@
                         {% endfor %}
                 {% elif search_type == "users" %}
                     {% if not users %}
-                        <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 85vh;">
+                        <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 79.5vh;">
                             <h3 class="header-title">Search for a username</h3>
                         </div>
                     {% endif %}

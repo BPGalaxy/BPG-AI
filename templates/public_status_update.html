@@ -1,0 +1,45 @@
+{% include 'site_messages.html' %}
+
+{% for character in characters %}
+                        {% if not character.is_deleted %}
+                            <div class="character-card">
+                                <div class="character-card-inner">
+                                    {% if character.ProfilePicture %}
+                                    <div class="character-image-wrapper">
+                                        <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
+                                    </div>
+                                    {% else %}
+                                    <div class="character-image-wrapper">
+                                        <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="character-info">
+                                        <h3 class="character-name">{{ character.Name }}</h3>
+                                        <p>{{ character.Description }}</p>
+
+                                        <form hx-post="/public_status/" hx-trigger="submit" hx-target="#public_statuss" hx-include="[name='character_id']" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="character_id" value="{{ character.id }}">
+                                                    {% if character.is_public %}
+                                                        <button class="delete-character-btn">Make It Private</button>
+                                                    {% else %}
+                                                        <button class="delete-character-btn green">Make It Public</button>
+                                                    {% endif %}
+                                            </form>
+
+                                        <form method="POST" action="{% url 'create_conversation' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="character_id" value="{{ character.id }}">
+                                            <button class="start-conversation-btn">Start Conversation</button>
+                                        </form>
+                                        
+                                        <form method="POST" action="{% url 'delete_character' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="character_id" value="{{ character.id }}">
+                                            <button class="delete-character-btn">Delete Character</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                {% endfor %}

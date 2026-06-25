@@ -1002,12 +1002,12 @@ def public_status(request):
     
     if character.is_public:
         character.is_public = False
-        ms.info(request ,"Status set to private")
     else:
         character.is_public = True
-        ms.info(request ,"Status set to public")
     character.save()
-    return redirect("user_characters")
+    characters = Characters.objects.filter(accountid=request.user)
+
+    return render(request, 'public_status_update.html', {"characters":characters})
 
 def browse(request):
     if not request.user.is_authenticated:
@@ -1043,13 +1043,40 @@ def search_results(request):
     user_search = request.GET.get('user_search', '')
     search_type = request.GET.get('type', 'characters')
 
-    characters = Characters.objects.filter(is_public=True, Name__icontains=user_search)
+    from django.db.models import Case, When, IntegerField, Value
+
     if len(user_search) == 0:
         users = None
-    elif len(user_search) < 3:
-        users = Status.objects.filter(is_banned=False, accountid__startswith=user_search)
+        characters = Characters.objects.all().filter(is_public=True)
+    if len(user_search) < 2:
+        users = None
+        characters = Characters.objects.all().filter(is_public=True)
     else:
-        users = Status.objects.filter(is_banned=False, accountid__icontains=user_search)
+        characters = (
+            Characters.objects
+            .filter(is_public=True, Name__icontains=user_search)
+            .annotate(
+                rank=Case(
+                    When(Name__istartswith=user_search, then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by('rank', 'Name')
+        )
+        users = (
+            Status.objects
+            .filter(is_banned=False, accountid__icontains=user_search)
+            .annotate(
+                rank=Case(
+                    When(accountid__istartswith=user_search, then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by('rank', 'accountid')
+        )
+
     no_characters = False
     if not characters.exists():
         no_characters = True
