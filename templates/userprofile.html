@@ -74,7 +74,7 @@
 
     <!-- Member since -->
      
-    <div class="member-card" style="backdrop-filter: blur(2px)">
+    <div class="member-card" id="member-card" style="backdrop-filter: blur(2px);">
         <h3>Member Since</h3>
         <p>{{ date_joined.year }}/{{ date_joined.month }}/{{ date_joined.day }}</p>
       {% if user_status.is_VIP %}
@@ -89,8 +89,7 @@
 </div>
 
 <div class="dropdown-divider" id="dropdown-divider"></div>
-
-              <div class="vip-profile-section {{ user_status.user_theme }}">
+              <div class="vip-profile-section {{ user_status.user_theme }}" style="padding-bottom:60px;">
                 {% if no_characters %}
                     <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 59vh;">
                         <h3 class="header-title" style="margin-top:40px;">This user haven't made any characters yet</h3>
@@ -103,12 +102,12 @@
                             <div class="character-card">
                                 <div class="character-card-inner">
                                     {% if character.ProfilePicture %}
-                                    <div class="character-image-wrapper">
+                                    <div class="character-image-wrapper" style="background:var(--clr-body-bg);">
                                         <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
                                     </div>
                                     {% else %}
                                     <div class="character-image-wrapper">
-                                        <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                        <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;text-align:center">{{ character.avatar }}</div>
                                     </div>
                                     {% endif %}
                                     <div class="character-info">
@@ -193,8 +192,7 @@
 })();
 document.getElementById('upper-balance').classList.add("vip-profile-section");
 document.getElementById('upper-balance').classList.add("{{ user_status.user_theme }}");
-document.getElementById('bottom-bar').classList.add("vip-profile-section");
-document.getElementById('bottom-bar').classList.add("{{ user_status.user_theme }}");
+document.getElementById('bottom-bar').style.background = 'var(--theme-shimmer)';
 document.getElementById('bottom-bar').style.border = 'var(--theme-shimmer)';
 document.getElementById('bottom-bar').style.boxShadow = '0 0px 10px var(--theme-glow), inset 0 1px 0 var(--theme-glow)';
 document.getElementById('bodye').classList.add("vip-profile-section");
@@ -205,6 +203,7 @@ document.getElementById('site-header').style.border = 'var(--theme-shimmer)';
 document.getElementById('dropdown-divider').style.borderTop = '1px solid var(--theme-shimmer)';
 document.getElementById('site-header').style.boxShadow = '0 0px 10px var(--theme-glow), inset 0 1px 0 var(--theme-glow)';
 document.getElementById('avatar-ring').style.border = '2px solid var(--theme-badge-border)';
+document.getElementById('member-card').style.background = 'var(--theme-badge-bg)';
 
 const cards = document.getElementsByClassName('character-card');
 const cards2 = document.getElementsByClassName('character-info');

@@ -32,8 +32,8 @@
                                     <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
                                 </div>
                                 {% else %}
-                                <div class="character-image-wrapper">
-                                    <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                <div class="character-image-wrapper" style="background:var(--clr-body-bg);">
+                                    <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;text-align:center">{{ character.avatar }}</div>
                                 </div>
                                 {% endif %}
                                 <div class="character-info">

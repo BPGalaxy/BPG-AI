@@ -16,8 +16,8 @@
                                             <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
                                         </div>
                                         {% else %}
-                                        <div class="character-image-wrapper">
-                                            <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                        <div class="character-image-wrapper" style="background:var(--clr-body-bg);">
+                                            <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%; text-align:center">{{ character.avatar }}</div>
                                         </div>
                                         {% endif %}
                                         <div class="character-info">
@@ -44,7 +44,7 @@
                     {% endif %}
                     <div class="characters-list" id="character-list"> 
                     {% for user in users %}
-                            <div class="character-card {% if user.is_VIP %}vip-profile-section {{ user.user_theme }}" style="border:1px solid var(--theme-ring); box-shadow:0 4px 16px rgba(0,0,0,0.3), 0 0 10px var(--theme-glow)"{% endif %}>
+                            <div class="character-card {% if user.is_VIP %}vip-profile-section {{ user.user_theme }}{% endif %}" {% if user.is_VIP %}style="border:1px solid var(--theme-ring); box-shadow:0 4px 16px rgba(0,0,0,0.3), 0 0 10px var(--theme-glow)"{% endif %}>
                                 <div class="character-card-inner">
                                     {% if user.user_profile %}
                                         <div class="character-image-wrapper">
@@ -67,7 +67,7 @@
                                         </div>
                                         <p>{{ user.Description }}</p>
                                         <form method="GET" action="/userprofile/{{ user.accountid }}" style="display: block; width: 100%; margin: 0; padding: 0;">
-                                            <button class="start-conversation-btn {% if user.is_VIP %}vip-profile-section {{ user.user_theme }}" style="color:var(--theme-accent); border:1px solid var(--theme-glow); box-shadow:0 6px 9px var(--theme-glow), 0 0 5px var(--theme-glow)"{% endif %}>Check Profile</button>
+                                            <button class="start-conversation-btn {% if user.is_VIP %}vip-profile-section {{ user.user_theme }}{% endif %}" {% if user.is_VIP %}style="color:var(--theme-accent); border:1px solid var(--theme-glow); box-shadow:0 6px 9px var(--theme-glow), 0 0 5px var(--theme-glow)"{% endif %}>Check Profile</button>
                                         </form>
                                     </div>
                                 </div>

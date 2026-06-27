@@ -575,7 +575,7 @@
 .avatar-ring { background: var(--theme-ring) !important; border: 2px solid var(--theme-badge-border)}
 .avatar-glow { background: radial-gradient(circle,var(--theme-glow) 0%,transparent 70%) !important; }
 .vip-status .status-text { color: var(--theme-status-color); }
-.member-card { background: var(--theme-badge-bg) !important; border-color: var(--theme-card-border) !important; }
+.member-card { !important; border-color: var(--theme-card-border) !important; }
 .member-card::before { background: linear-gradient(90deg,transparent,var(--theme-card-top),transparent) !important; }
 .member-card h3 { color: var(--theme-member-label) !important; }
 .member-card p { color: var(--theme-member-value) !important; }

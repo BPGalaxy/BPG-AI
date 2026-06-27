@@ -65,7 +65,7 @@ def stream_chat(request, user_message, system_message, chat_id):
     def event_stream():
         url = "http://localhost:11434/api/chat"
         model = "fluffy/l3-8b-stheno-v3.2"
-        print(system_message)
+
         payload = {
             "model": model,
             "messages": [
@@ -155,9 +155,10 @@ def create_character(request):
     if user_status.is_banned:
         return render(request, "Banned.html")
 
+    user_character_count = len(Characters.objects.all().filter(accountid=request.user, is_deleted=False))
     if request.method == "POST":
-        if not user_status.is_VIP:
-            ms.error("Not a VIP user")
+        if user_character_count >= 3:
+            ms.error(request, "You need vip to create more characters")
             return redirect("homepage")
         form = CharacterPrompt(request.POST, request.FILES)
         if form.is_valid():
@@ -222,12 +223,6 @@ RIGHT: *rubs her eyes and sets down the mug* "Didn't sleep." *looks away*
             Characters.objects.create(accountid=request.user, Name=cd["Name"], ProfilePicture=picture, Description=cd["Description"],
                                  avatar=str(cd["Name"])[0:1], last_message=f"{str(cd['OpeningLine'])[:50]}...",
                                  Prompt=prompt, OpeningLine=cd["OpeningLine"])
-            CharacterID = Characters.objects.last().id
-            Chats.objects.create(chatid=generatedID, accountid=request.user, chatname=cd["Name"],
-                                 CharacterID=CharacterID, avatar=str(cd["Name"])[0:1], last_message=f"{str(cd['OpeningLine'])[:50]}...",
-                                 AI_Prompt=prompt)
-            Message.objects.create(accountid=request.user, chatid=generatedID, text=cd["OpeningLine"],
-                                   senderuser="ai message")
             sleep(0.1)
 
             set_chat = Status.objects.get(accountid=request.user)
@@ -235,13 +230,13 @@ RIGHT: *rubs her eyes and sets down the mug* "Didn't sleep." *looks away*
             set_chat.save()
 
             ms.success(request, "New character created successfully")
-            return redirect(f"/chats/?chat_id={generatedID}")
+            return redirect("user_characters")
     else:
         if not request.user.is_authenticated:
             ms.error(request, "Not logged in")
             return redirect(f"homepage")
         form = CharacterPrompt()
-        return render(request, "forms/create_character.html", {"form": form, "user_status":user_status})
+        return render(request, "forms/create_character.html", {"form": form, "user_status": user_status, "user_character_count": user_character_count})
 
 def homepage(request):
     try:
@@ -431,11 +426,15 @@ def handle_text(request):
 
     if request.method == "POST":
         GenerateStatus = Status.objects.get(accountid=request.user).Generate_status
-
+        CanChat = True
         if GenerateStatus is True:
             ms.error(request, "One Request is already being processed")
             return redirect(f"/chats/?chat_id={chat_id}")
 
+        if CanChat is False:
+            ms.error(request, "Chatting with AI is currently disabled by admin")
+            return redirect(f"/chats/?chat_id={chat_id}")
+        
         elif not request.user.is_authenticated:
             ms.error(request, "Not logged in")
             return redirect(f"/chats/?chat_id={chat_id}")
@@ -454,7 +453,7 @@ def handle_text(request):
                 else:
                     pass
                     conversation += f"{conversationList[memoryLimit - 2 - i]}\n"
-            print((messages.count() - 1) % updateSummary)
+
             if (messages.count() - 1) % updateSummary == 0 and messages.count() != 0:
                 if Chats.objects.get(chatid=chat_id).summary == '':
                     tempconv = ''
@@ -638,7 +637,7 @@ def chats(request):
         for chat in chats:
             checkDeletedList.append(chat.is_deleted)
         checkDeleted = all(checkDeletedList)
-        print(checkDeletedList)
+
         return render(request, "chats/chats.html", {"user":request.user, "userchats":ordered_chats, "last_message":last_message,
                                                     "CustomInstructions": CustomInstructions,"Name": Name, "Emoji":Emoji,
                                                     "Occupation": Occupation, "Interests": Interests, "user_status":user_status,
@@ -1053,9 +1052,14 @@ def search_results(request):
         users = None
         characters = Characters.objects.all().filter(is_public=True)
     else:
+        from django.db.models import Q
+
         characters = (
             Characters.objects
-            .filter(is_public=True, Name__icontains=user_search)
+            .filter(
+                Q(is_public=True) &
+                (Q(Name__icontains=user_search) | Q(Description__icontains=user_search))
+            )
             .annotate(
                 rank=Case(
                     When(Name__istartswith=user_search, then=Value(0)),

@@ -48,7 +48,7 @@
                 </div>
             </form>
 
-            <div id="search_results">
+            <div id="search_results" style="padding-bottom:60px;">
                 {% if search_type == "characters" %}
                     {% if no_characters %}
                         <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 79.5vh;">
@@ -64,8 +64,8 @@
                                             <img src="{{ character.ProfilePicture.url }}" alt="{{ character.Name }}'s Profile Picture" class="character-image">
                                         </div>
                                         {% else %}
-                                        <div class="character-image-wrapper">
-                                            <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%;">{{ character.avatar }}</div>
+                                        <div class="character-image-wrapper" style="background:var(--clr-body-bg);">
+                                            <div style="font-size:72px; font-family: 'Noto Serif', sans-serif; margin-top:40%; text-align:center">{{ character.avatar }}</div>
                                         </div>
                                         {% endif %}
                                         <div class="character-info">

@@ -50,11 +50,11 @@
     <div class="header-title">Create Character</div>
 {% endblock %}
 {% block content %}
-    {% if not user_status.is_VIP %}
+    {% if user_character_count >= 3 %}
         <div class="overlay open" id="SetMenu">
             <div class="modal vip" id="modal">
                 <div class="modal-icon" id="modal-icon">♦</div>
-                <p class="modal-text" id="modal-text">Creating roleplay chatbot is only<br> available to <span class="modal-level">VIP</span> users.</p>
+                <p class="modal-text" id="modal-text">You need <span class="modal-level">VIP</span> subscription to create more than 3 characters.</p>
                 <form action="{% url 'homepage' %}" method="GET">
                     <button type="submit" class="modal-close" onclick="document.getElementById('SetMenu').classList.remove('open');"><span class="btn-inner">Got it</span></button>
                 </form>
@@ -62,7 +62,7 @@
         </div>
     {% endif %}
     <div style="height:100%;"></div>
-        <div class="ai form_container" style="width:90%;margin-bottom:70px;"><span class="pill badge-vip" onclick="showModal('vip')" style="margin-bottom:-3px; cursor:default;"><span class="inner">♦ VIP</span></span>
+        <div class="ai form_container" style="width:90%;margin-bottom:70px;margin-top:10px;"><span class="pill badge-vip" onclick="showModal('vip')" style="margin-bottom:-3px; cursor:default;"><span class="inner">♦ VIP</span></span>
             <h2>Create Roleplay Character</h2>
             <form action="" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
