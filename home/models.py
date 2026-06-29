@@ -68,6 +68,7 @@ class Characters(models.Model):
     Description = models.TextField(default="")
     Prompt = models.TextField(default="")
     OpeningLine = models.TextField(default="")
+    TotalChats = models.IntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
     

@@ -111,7 +111,10 @@
                                     </div>
                                     {% endif %}
                                     <div class="character-info">
-                                        <h3 class="character-name">{{ character.Name }}</h3>
+                                        <div style="display:flex">
+                                            <h3 class="character-name">{{ character.Name }}</h3>
+                                            <svg style="margin-left:auto; width:20px; height: 20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path fill="var(--clr-lavender-light)" d="M64 416L64 192C64 139 107 96 160 96L480 96C533 96 576 139 576 192L576 416C576 469 533 512 480 512L360 512C354.8 512 349.8 513.7 345.6 516.8L230.4 603.2C226.2 606.3 221.2 608 216 608C202.7 608 192 597.3 192 584L192 512L160 512C107 512 64 469 64 416z"/></svg><p>Chats:</p><p class="TotalChatNumber">{{character.TotalChats}}</p>
+                                        </div>
                                         <p style="color:var(--theme-accent)">{{ character.Description }}</p>
                                         <form method="POST" action="{% url 'create_conversation' %}" style="display: block; width: 100%; margin: 0; padding: 0;">
                                             {% csrf_token %}

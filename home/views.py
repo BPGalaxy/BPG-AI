@@ -955,6 +955,8 @@ def create_conversation(request):
                          AI_Prompt=character.Prompt)
     Message.objects.create(accountid=request.user, chatid=generatedID, text=character.OpeningLine,
                                    senderuser="ai message")
+    character.TotalChats = (character.TotalChats+1)
+    character.save()
     
     ms.success(request, "New conversation created successfully")
     return redirect(f"/chats/?chat_id={generatedID}")
@@ -1019,7 +1021,7 @@ def browse(request):
     
     search_type = request.GET.get("type", "characters")
 
-    characters = Characters.objects.all().filter(is_public=True)
+    characters = Characters.objects.all().filter(is_public=True).order_by('-TotalChats', 'Name')
     users = None
     
     no_characters = False
@@ -1047,10 +1049,10 @@ def search_results(request):
 
     if len(user_search) == 0:
         users = None
-        characters = Characters.objects.all().filter(is_public=True)
+        characters = Characters.objects.all().filter(is_public=True).order_by('-TotalChats')
     if len(user_search) < 2:
         users = None
-        characters = Characters.objects.all().filter(is_public=True)
+        characters = Characters.objects.all().filter(is_public=True).order_by('-TotalChats')
     else:
         from django.db.models import Q
 
@@ -1067,7 +1069,7 @@ def search_results(request):
                     output_field=IntegerField(),
                 )
             )
-            .order_by('rank', 'Name')
+            .order_by('rank', '-TotalChats', 'Name')
         )
         users = (
             Status.objects
