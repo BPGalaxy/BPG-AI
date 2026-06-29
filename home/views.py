@@ -157,7 +157,7 @@ def create_character(request):
 
     user_character_count = len(Characters.objects.all().filter(accountid=request.user, is_deleted=False))
     if request.method == "POST":
-        if user_character_count >= 3:
+        if not user_status.is_VIP and user_character_count >= 3:
             ms.error(request, "You need vip to create more characters")
             return redirect("homepage")
         form = CharacterPrompt(request.POST, request.FILES)

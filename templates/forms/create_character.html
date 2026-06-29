@@ -50,7 +50,7 @@
     <div class="header-title">Create Character</div>
 {% endblock %}
 {% block content %}
-    {% if user_character_count >= 3 %}
+    {% if not user_status.is_VIP and user_character_count >= 3 %}
         <div class="overlay open" id="SetMenu">
             <div class="modal vip" id="modal">
                 <div class="modal-icon" id="modal-icon">♦</div>
