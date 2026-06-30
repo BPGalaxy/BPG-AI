@@ -77,3 +77,5 @@ class Characters(models.Model):
 
 class Settings(models.Model):
     today = models.IntegerField(default=0)
+    current_AI = models.TextField(default="local")
+    AI_Status = models.IntegerField(default=0)

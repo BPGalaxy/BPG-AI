@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from .models import *
 from django.contrib import messages as ms
-from django.db.models import Case, When, Value
+from django.db.models import Case, When, IntegerField, Value
 from django.contrib.auth.models import User
 from .forms import CharacterPrompt
 from time import sleep
@@ -14,7 +14,52 @@ import json
 import datetime
 import os
 
-#Streaming off version of sending messages
+def switch_AI(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return render(request, "404.html")
+    is_banned = Status.objects.get(accountid=request.user).is_banned
+    if is_banned:
+        return render(request, "Banned.html")
+    
+    settings = Settings.objects.get(id=1)
+    if settings.current_AI == "local":
+        settings.current_AI = "online"
+        settings.save()
+        ms.info(request, "AI model set to online")
+    else:
+        settings.current_AI = "local"
+        settings.save()
+        ms.info(request, "AI model set to local")
+    settings.save()
+    
+    return redirect("homepage")
+
+def AI_Status(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return render(request, "404.html")
+    is_banned = Status.objects.get(accountid=request.user).is_banned
+    if is_banned:
+        return render(request, "Banned.html")
+    
+    if not request.user.is_authenticated:
+        return render(request, "404.html")
+    is_banned = Status.objects.get(accountid=request.user).is_banned
+    if is_banned:
+        return render(request, "Banned.html")
+    
+    settings = Settings.objects.get(id=1)
+    if settings.AI_Status == 0:
+        settings.AI_Status = 1
+        settings.save()
+        ms.info(request, "AI Status set to on")
+    else:
+        settings.AI_Status = 0
+        settings.save()
+        ms.info(request, "AI Status set to off")
+    settings.save()
+    
+    return redirect("homepage")
+
 def generate_summary(request, user_message, system_message, chat_id):
     if not request.user.is_authenticated:
         ms.error(request, "Not logged in")
@@ -62,62 +107,106 @@ def stream_chat(request, user_message, system_message, chat_id):
     
     temp = Message.objects.get(accountid=request.user, text="Generating", senderuser="ai message")
     generating_message = Message.objects.get(id=temp.id)
+    current_AI = Settings.objects.get(id=1).current_AI
     def event_stream():
-        url = "http://localhost:11434/api/chat"
-        model = "fluffy/l3-8b-stheno-v3.2"
+        if current_AI == "local":
+            url = "http://localhost:11434/api/chat"
+            model = "fluffy/l3-8b-stheno-v3.2"
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role":"system", "content":system_message},
+                    {"role": "user", "content": '\nLast user message: ' + user_message+"- Your responses don't have to exceed 100 words.\n"
+                                                '- never include "ai message:" at the start of your response.'}
+                ],
+                "stream": True
+            }
 
-        payload = {
-            "model": model,
-            "messages": [
-                {"role":"system", "content":system_message},
-                {"role": "user", "content": '\nLast user message: ' + user_message+"- Your responses don't have to exceed 100 words.\n"
-                                            '- never include "ai message:" at the start of your response.'}
-            ],
-            "stream": True
-        }
+            try:
+                response = requests.post(url, json=payload, stream=True)
+                response.raise_for_status()
 
-        try:
-            response = requests.post(url, json=payload, stream=True)
-            response.raise_for_status()
+                if not Status.objects.get(accountid=request.user).is_VIP:
+                    message_count = Status.objects.get(accountid=request.user)
+                    message_count.remaining_messages -= 1
+                    message_count.save()
 
-            if not Status.objects.get(accountid=request.user).is_VIP:
-                message_count = Status.objects.get(accountid=request.user)
-                message_count.remaining_messages -= 1
-                message_count.save()
+                generating_message.text = ""
+                generating_message.save()
 
-            generating_message.text = ""
-            generating_message.save()
+                i = 0
+                full_response = ""
+                for line in response.iter_lines():
+                    if not line:
+                        continue  # Skip empty lines
 
-            i = 0
-            full_response = ""
-            for line in response.iter_lines():
-                if not line:
-                    continue  # Skip empty lines
+                    try:
+                        data = json.loads(line.decode('utf-8'))
+                        chunk = data.get('message', {}).get('content', '')
+                        if not chunk:
+                            chunk = data.get('response', '')
 
-                try:
-                    data = json.loads(line.decode('utf-8'))
-                    chunk = data.get('message', {}).get('content', '')
-                    if not chunk:
-                        chunk = data.get('response', '')
+                        if chunk:
+                            full_response += chunk
+                            i += 1
+                            if i == 5:
+                                i = 0
+                                generating_message.text = full_response
+                                generating_message.save()
+                                sleep(0.1)
 
-                    if chunk:
-                        full_response += chunk
-                        i += 1
-                        if i == 5:
-                            i = 0
-                            generating_message.text = full_response
-                            generating_message.save()
-                            sleep(0.1)
+                    except json.JSONDecodeError:
+                        generating_message.text = line.decode('utf-8')
+                        generating_message.save()
+                        sleep(0.1)
 
-                except json.JSONDecodeError:
-                    generating_message.text = line.decode('utf-8')
-                    generating_message.save()
-                    sleep(0.1)
+                    except Exception as e:
+                        generating_message.text = e
+                        generating_message.save()
+                        sleep(0.1)
 
-                except Exception as e:
-                    generating_message.text = e
-                    generating_message.save()
-                    sleep(0.1)
+                generating_message.text = full_response
+                generating_message.save()
+
+                target_chat = Chats.objects.get(chatid=chat_id)
+                target_chat.last_message = f"{full_response[:50]}..."
+                target_chat.save()
+                sleep(0.1)
+
+                GenerateStatusFalse = Status.objects.get(accountid=request.user)
+                GenerateStatusFalse.Generate_status = False
+                GenerateStatusFalse.save()
+                sleep(0.1)
+                return redirect(f"/chats/?chat_id={chat_id}")
+
+            except requests.exceptions.RequestException as e:
+                generating_message.text = e
+                generating_message.save()
+                sleep(0.1)
+                return redirect(f"/chats/?chat_id={chat_id}")
+
+            except Exception as e:
+                generating_message.text = e
+                generating_message.save()
+                sleep(0.1)
+                return redirect(f"/chats/?chat_id={chat_id}")
+        else:
+            from cerebras.cloud.sdk import Cerebras
+
+            client = Cerebras(
+                api_key="csk-6rf5pm8nny3knc98ehemvj8cmptdd89dxdkje3e4ejnrtw8y",
+            )
+
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role":"system", "content":system_message},
+                    {"role": "user", "content": '\nLast user message: ' + user_message+"- Your responses don't have to exceed 100 words.\n"
+                                                '- never include "ai message:" at the start of your response.'}
+                ],
+                model="gpt-oss-120b",
+            )
+
+            full_response = chat_completion.choices[0].message.content
 
             generating_message.text = full_response
             generating_message.save()
@@ -130,18 +219,6 @@ def stream_chat(request, user_message, system_message, chat_id):
             GenerateStatusFalse = Status.objects.get(accountid=request.user)
             GenerateStatusFalse.Generate_status = False
             GenerateStatusFalse.save()
-            sleep(0.1)
-            return redirect(f"/chats/?chat_id={chat_id}")
-
-        except requests.exceptions.RequestException as e:
-            generating_message.text = e
-            generating_message.save()
-            sleep(0.1)
-            return redirect(f"/chats/?chat_id={chat_id}")
-
-        except Exception as e:
-            generating_message.text = e
-            generating_message.save()
             sleep(0.1)
             return redirect(f"/chats/?chat_id={chat_id}")
 
@@ -262,11 +339,18 @@ def homepage(request):
         Settings.objects.get(id=1).today
     except:
         Settings.objects.create(today=day)
+
     if not Settings.objects.get(id=1).today == day:
         Status.objects.all().update(remaining_messages=100)
         Settings.objects.filter(id=1).update(today=day)
 
-    return render(request,'homepage.html', {"username": request.user.username, "user_status":user_status})
+    current_AI = Settings.objects.get(id=1).current_AI
+    AI_Status = Settings.objects.get(id=1).AI_Status
+    if AI_Status == 0:
+        AI_Status = "On"
+    else:
+        AI_Status = "Off"
+    return render(request,'homepage.html', {"username": request.user.username, "user_status":user_status, "current_AI":current_AI, "AI_Status":AI_Status})
 
 def userpage(request):
     if request.method == "POST":
@@ -372,6 +456,7 @@ def delete_profile(request):
         ms.info(request,"Profile picture deleted.")
     
     return redirect("userpage")
+
 @csrf_exempt
 def handle_text(request):
     try:
@@ -387,6 +472,11 @@ def handle_text(request):
     
     if Status.objects.get(accountid=request.user).is_limit:
         return redirect(f"/chats/?chat_id={chat_id}")
+    
+    if Settings.objects.get(id=1).AI_Status == 0:
+        ms.error(request, "Chatting with AI is currently off by owner")
+        return redirect(f"/chats/?chat_id={chat_id}")
+    
     user_input = request.POST.get("user_text")
 
     messages = Message.objects.all().filter(accountid=request.user, chatid=chat_id)
@@ -1045,8 +1135,6 @@ def search_results(request):
     user_search_length = len(user_search)
     search_type = request.GET.get('type', 'characters')
 
-    from django.db.models import Case, When, IntegerField, Value
-
     if len(user_search) == 0:
         users = None
         characters = Characters.objects.all().filter(is_public=True).order_by('-TotalChats')
@@ -1100,7 +1188,7 @@ def delete_black_messages(request):
             message.delete()
 
 def test(request):
-    if not request.user.is_authenticated:
+    if not request.user.is_authenticated or not request.user.is_staff:
         return render(request, "404.html")
     is_banned = Status.objects.get(accountid=request.user).is_banned
     if is_banned:
