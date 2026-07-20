@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
+{% load static %}
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
     <title>BPG RP (Beta Ver)</title>
     <style>{% include 'static/css/base.style.css' %}</style>
     <style> {% include 'static/css/all.min.css' %}</style>
@@ -12,9 +17,6 @@
         {% endblock %}
     </style>
 </head>
-
-
-{% load static %}
 
 <script>
 {% block topscript %}
@@ -272,14 +274,14 @@
     document.addEventListener("click", () => {
         closeAllMenus();
     });
-
+    
 {% if user_status.is_VIP %}
     {% include 'static/js/theme-switcher.js' %}
 {% endif %}
   const config = {
     staff: { icon: '🔵', text: 'You have <span class="modal-level">Staff</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel" /><br></form></div>' },
     dev:   { icon: '🔴', text: 'You have <span class="modal-level">Developer</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/></form></div>' },
-    owner: { icon: '✦',  text: 'You have <span class="modal-level">Owner</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/></form><form action="/switch_AI" method="GET"><input class="modal-close" type="submit" value="Switch AI Model (current: {{current_AI}})"/><br></form><form action="/AI_Status" method="GET"><input class="modal-close" type="submit" value="Set AI Status to {{AI_Status}}"/><br></form></div>' },
+    owner: { icon: '✦',  text: 'You have <span class="modal-level">Owner</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/></form>           <form action="/switch_AI" method="GET"><input class="modal-close" type="submit" value="Switch AI Model (current: {{current_AI}})"/><br></form><form action="/AI_Status" method="GET"><input class="modal-close" type="submit" value="Set AI Status to {{AI_Status}}"/><br></form></div>' },
     vip:   { icon: '♦',  text: 'You are a <span class="modal-level">VIP</span> user.<br> You have access to following features:<br><br><span class="modal-level">Customizing your AI responds with giving custom instructions to AI</span><br><div class="dropdown-divider" style="margin: 6px 0;  border-top: 1px solid #c89000;"></div><span class="modal-level">Creating and customizing your own roleplay character</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Respond prority in high traffic times</span><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Unlimited messages (No daily limit)</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div> <span class="modal-level">Up to 15 exclusive colors to customize your profile look</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Exclusive golden theme</span><br><button id="theme-toggle-btn" style="margin-top:5px;"><span class="btn-inner"></span></button>', buttons: '' },
     notvip:   { icon: '♦',  text: 'With <span class="modal-level">VIP</span> subscription.<br> You will have access to following features:<br><br><span class="modal-level">Customizing your AI responds with giving custom instructions to AI</span><br><div class="dropdown-divider" style="margin: 6px 0;  border-top: 1px solid #c89000;"></div><span class="modal-level">Creating and customizing your own roleplay character</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Respond prority in high traffic times</span><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Unlimited messages (No daily limit)</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div> <span class="modal-level">Up to 15 exclusive colors to customize your profile look</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Exclusive golden theme</span><br>', buttons: '' },
     };

@@ -99,9 +99,12 @@
                     {% endif %}
                 {% endif %}
             {% empty %}
-                <div  style="display: flex; justify-content: center; align-items: center; height: 95vh;">
+                <div  style="display: flex; justify-content: center; align-items: center; min-height: 95dvh;">
                     <h3 class="header-title">How can i help you today {{ request.user }}?</h3>
                 </div>
+                <script>
+                    document.getElementById("upper-balance").style.padding = 0;
+                </script>
             {% endfor %}
 </div>
 <script>

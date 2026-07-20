@@ -105,7 +105,7 @@ def stream_chat(request, user_message, system_message, chat_id):
     if is_banned:
         return render(request, "Banned.html")
     
-    temp = Message.objects.get(accountid=request.user, text="Generating", senderuser="ai message")
+    temp = Message.objects.get(accountid=request.user, chatid=chat_id, text="Generating", senderuser="ai message")
     generating_message = Message.objects.get(id=temp.id)
     current_AI = Settings.objects.get(id=1).current_AI
     def event_stream():
@@ -190,24 +190,66 @@ def stream_chat(request, user_message, system_message, chat_id):
                 generating_message.save()
                 sleep(0.1)
                 return redirect(f"/chats/?chat_id={chat_id}")
+            
         else:
-            from cerebras.cloud.sdk import Cerebras
+            
+            #openai/gpt-oss-20b:free
+            #nvidia/nemotron-3-ultra-550b-a55b:free
+            #poolside/laguna-m.1:free
+            #google/gemma-4-26b-a4b-it:free
+            model = "google/gemma-4-26b-a4b-it:free"
 
-            client = Cerebras(
-                api_key="csk-6rf5pm8nny3knc98ehemvj8cmptdd89dxdkje3e4ejnrtw8y",
-            )
-
-            chat_completion = client.chat.completions.create(
-                messages=[
+            # First API call with reasoning
+            response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": "Bearer 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",
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "model": model,
+                "messages": [
                     {"role":"system", "content":system_message},
                     {"role": "user", "content": '\nLast user message: ' + user_message+"- Your responses don't have to exceed 100 words.\n"
                                                 '- never include "ai message:" at the start of your response.'}
                 ],
-                model="gpt-oss-120b",
+                "reasoning": {"enabled": True}
+            })
             )
 
-            full_response = chat_completion.choices[0].message.content
+            # Extract the assistant message with reasoning_details
+            response = response.json()
+            print(response)
+            response = response['choices'][0]['message']
 
+            # Preserve the assistant message with reasoning_details
+            messages = [
+            {"role":"system", "content":system_message},
+            {"role": "user", "content": '\nLast user message: ' + user_message+"- Your responses don't have to exceed 100 words.\n"
+                            '- never include "ai message:" at the start of your response.'},
+            {
+                "role": "assistant",
+                "content": response.get('content'),
+                "reasoning_details": response.get('reasoning_details')  # Pass back unmodified
+            },
+            ]
+
+            # Second API call - model continues reasoning from where it left off
+            response2 = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": "Bearer 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",
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "model": model,
+                "messages": messages,  # Includes preserved reasoning_details
+                "reasoning": {"enabled": True}
+            })
+            )
+
+            last_response = response2.json()
+            full_response = last_response['choices'][0]['message']['content']
             generating_message.text = full_response
             generating_message.save()
 
@@ -611,14 +653,17 @@ def handle_text(request):
 
         if rename_chat.chatname == "New Chat":
             if user_input == "23458235719129483094813941048395134124":
+                print("a")
                 rename_chat.avatar = "P"
                 rename_chat.chatname = "PRIVATE KEY"
             elif len(user_input) < 20:
+                print("b")
                 target_chat.avatar = user_input[0:1]
                 rename_chat.chatname = user_input
             else:
+                print("c")
                 target_chat.avatar = user_input[0:1]
-                rename_chat.chatname = user_input[20]+"..."
+                rename_chat.chatname = user_input[0:20]+"..."
             rename_chat.save()
 
         GenerateStatusTrue = Status.objects.get(accountid=request.user)

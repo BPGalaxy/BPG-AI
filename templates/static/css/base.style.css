@@ -99,7 +99,7 @@ body {
         .parent-container{
             width:100%;
             max-width:950px;
-            min-height: 100vh;
+            min-height: 100dvh;
             height:100%;
             background-size: cover;
             background-repeat: no-repeat;
@@ -412,7 +412,7 @@ body {
           position: fixed;
           top: 0;
           left: 0;
-          height: 100vh;
+          height: 100dvh;
           width: 300px;
           background: var(--clr-drawer-bg);
           transform: translateX(-100%);
