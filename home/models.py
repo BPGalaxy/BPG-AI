@@ -29,11 +29,11 @@ class Status(models.Model):
 
 class Customization(models.Model):
     accountid = models.TextField(default="AnonymousUser")
-    CustomInstructions = models.TextField(default="")
-    Name = models.TextField(default="")
-    Emoji = models.TextField(default="")
-    Occupation = models.TextField(default="")
-    Interests = models.TextField(default="")
+    CustomInstructions = models.TextField(default="", blank=True, null=True)
+    Name = models.TextField(default="", blank=True, null=True)
+    Emoji = models.TextField(default="", blank=True, null=True)
+    Occupation = models.TextField(default="", blank=True, null=True)
+    Interests = models.TextField(default="", blank=True, null=True)
 
     def __str__(self):
         return self.Name

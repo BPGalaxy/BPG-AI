@@ -1,22 +1,50 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, redirect
-from .models import *
-from django.contrib import messages as ms
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 from django.db.models import Case, When, IntegerField, Value
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render, redirect
+from django.contrib import messages as ms
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from .forms import CharacterPrompt
-from time import sleep
 from dotenv import load_dotenv
+from functools import wraps
+from time import sleep
+from .models import *
 import threading
+import datetime
 import requests
 import random
 import json
-import datetime
 import os
 
+def normal_user_check(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        is_banned = Status.objects.get(accountid=request.user).is_banned
+        if is_banned:
+            return render(request, "Banned.html")
+        
+        if not request.user.is_authenticated:
+            ms.error(request, "Not logged in")
+            return redirect("homepage")
 
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def admin_user_check(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return render(request, "404.html")
+
+        is_banned = Status.objects.get(accountid=request.user).is_banned
+        if is_banned:
+            return render(request, "Banned.html")
+
+        return view_func(request, *args, **kwargs)
+    return wrapper
+    
 def _get_generation_cache_key(user_id, chat_id):
     return f"chat_generation:{user_id}:{chat_id}"
 
@@ -109,14 +137,8 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
         status_obj.save()
         _set_generation_cache(user_pk, chat_id, "error", text=str(e), error=str(e))
 
-
+@admin_user_check
 def switch_AI(request):
-    if not request.user.is_authenticated or not request.user.is_staff:
-        return render(request, "404.html")
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
     settings = Settings.objects.get(id=1)
     if settings.current_AI == "local":
         settings.current_AI = "online"
@@ -130,19 +152,8 @@ def switch_AI(request):
     
     return redirect("homepage")
 
+@admin_user_check
 def AI_Status(request):
-    if not request.user.is_authenticated or not request.user.is_staff:
-        return render(request, "404.html")
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
-    if not request.user.is_authenticated:
-        return render(request, "404.html")
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
     settings = Settings.objects.get(id=1)
     if settings.AI_Status == 0:
         settings.AI_Status = 1
@@ -157,14 +168,6 @@ def AI_Status(request):
     return redirect("homepage")
 
 def generate_summary(request, user_message, system_message, chat_id):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
     GenerateStatus = Status.objects.get( accountid=request.user)
     GenerateStatus.Generate_status = True
     GenerateStatus.save()
@@ -308,14 +311,9 @@ def stream_chat(request):
     response['X-Accel-Buffering'] = 'no'
     return response
 
+@normal_user_check
 def create_character(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
     user_status = Status.objects.get(accountid=request.user)
-    if user_status.is_banned:
-        return render(request, "Banned.html")
 
     user_character_count = len(Characters.objects.all().filter(accountid=request.user, is_deleted=False))
     if request.method == "POST":
@@ -460,13 +458,13 @@ def userpage(request):
         customization = Customization.objects.get(accountid=request.user)
     except:
         return redirect("login")
+    is_banned = Status.objects.get(accountid=request.user).is_banned
+    if is_banned:
+        return render(request, "Banned.html")
     return render(request, "userdashbord.html", {"user_status":user_status, "customization":customization, "request":request.user.is_authenticated})
 
+@normal_user_check
 def userprofile(request, username):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
     UserNotFound = False
     try:
         date_joined = User.objects.get(username=username).date_joined
@@ -493,15 +491,10 @@ def userprofile(request, username):
 
     return render(request, "userprofile.html", {'characters': characters, "user_status":user_status, "date_joined":date_joined, "checkDeleted":checkDeleted, "no_characters":no_characters, "UserNotFound":UserNotFound})
 
+@normal_user_check
 @csrf_exempt
-def changetheme(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-    
+def changetheme(request):  
     user_status = Status.objects.get(accountid=request.user)
-    if user_status.is_banned:
-            return render(request, "Banned.html")
     
     if not user_status.is_VIP:
         return redirect("userpage")
@@ -526,14 +519,9 @@ def changetheme(request):
     ms.success(request, "Your profile theme updated successfully")
     return redirect("userpage")
 
+@normal_user_check
 def delete_profile(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-    
     user_status = Status.objects.get(accountid=request.user)
-    if user_status.is_banned:
-            return render(request, "Banned.html")
     
     if user_status.user_profile:
         user_status.user_profile.delete()
@@ -552,8 +540,7 @@ def handle_text(request):
     
     chat_id = request.POST.get("chat_id")
 
-    if request.method == "GET":
-        return render(request, "404.html")
+    if request.method == "GET":return render(request, "404.html")
     
     if Status.objects.get(accountid=request.user).is_limit:
         return redirect(f"/chats/?chat_id={chat_id}")
@@ -722,14 +709,9 @@ def handle_text(request):
 
         return redirect(f"/chats/?chat_id={chat_id}")
 
+@normal_user_check
 def chats(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
     user_status = Status.objects.get(accountid=request.user)
-    if user_status.is_banned:
-        return render(request, "Banned.html")
 
     chat_id = request.GET.get("chat_id", "None")
     if chat_id != "None" and chat_id not in Chats.objects.all().values_list("chatid", flat=True):
@@ -828,15 +810,8 @@ def chats(request):
                                                     "chat_characters": chat_characters, "checkDeleted":checkDeleted
                                                     })
 
+@normal_user_check
 def get_instructions(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-
     if request.method == "GET":
         return render(request, "404.html")
     
@@ -854,15 +829,8 @@ def get_instructions(request):
     ms.success(request, "Instructions updated")
     return redirect("userpage")
 
+@normal_user_check
 def new_chat(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-
     chats = Chats.objects.all().filter(accountid=request.user)
     CustomInstructions = Customization.objects.get(accountid=request.user).CustomInstructions
     Name = Customization.objects.get(accountid=request.user).Name
@@ -888,15 +856,8 @@ def new_chat(request):
     ms.success(request, "New chat created")
     return redirect(f"/chats/?chat_id={generatedID}")
 
+@normal_user_check
 def load_messages(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-
     chat_id = request.GET.get("chat_id", "None")
     if chat_id == "None":
         return render(request, "404.html")
@@ -927,15 +888,8 @@ def load_messages(request):
         last_user_message = "none"
     return render(request, "chats/get_messages.html", {"messagess": messagess, "chatname":chatname, "chat_id":chat_id, "chat_count":chat_count, "last_ai_message":last_ai_message, "last_user_message":last_user_message, "last_ai_message_id":last_ai_message_id, "username": request.user.username, "GenerateStatus": str(GenerateStatus).lower()})
 
+@normal_user_check
 def copy_message(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-
     if request.method == "GET":
         return render(request, "404.html")
     
@@ -1050,15 +1004,8 @@ def edit_message(request):
 
         return redirect(f"/chats/?chat_id={chat_id}")
 
+@normal_user_check
 def rename_chat(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-
     chat_id = request.POST.get("chat_id_rename", "None")
     if chat_id == "None":
         return render(request, "404.html")
@@ -1082,15 +1029,8 @@ def rename_chat(request):
 
     return redirect(f"/chats/?chat_id={chat_id}")
 
+@normal_user_check
 def delete_chat(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-
     chat_id = request.POST.get("chat_id_delete")
     if chat_id == None:
         return render(request, "404.html")
@@ -1108,15 +1048,8 @@ def delete_chat(request):
     ms.success(request, "Chat deleted successfully")
     return redirect("/chats")
 
+@normal_user_check
 def user_characters(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    user_status = Status.objects.get(accountid=request.user)
-    if user_status.is_banned:
-        return render(request, "Banned.html")
-    
     characters = Characters.objects.all().filter(accountid=request.user)
     checkDeletedList = []
 
@@ -1126,15 +1059,8 @@ def user_characters(request):
 
     return render(request, 'User_characters.html', {'characters': characters, "checkDeleted":checkDeleted})
 
+@normal_user_check
 def create_conversation(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
     try:
         character = Characters.objects.get(id=request.POST.get("character_id"))
     except:
@@ -1155,17 +1081,10 @@ def create_conversation(request):
     ms.success(request, "New conversation created successfully")
     return redirect(f"/chats/?chat_id={generatedID}")
 
-def delete_character(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
-    CharacterID = request.POST.get("character_id", "None")
-    if CharacterID == "None":
+@normal_user_check
+def delete_character(request):  
+    CharacterID = request.POST.get("character_id")
+    if not CharacterID:
         return render(request, "404.html")
     character = Characters.objects.get(id=CharacterID)
     character.is_deleted = True
@@ -1177,15 +1096,8 @@ def delete_character(request):
     ms.success(request, "Character deleted successfully")
     return redirect("user_characters")
 
+@normal_user_check
 def public_status(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
     CharacterID = request.POST.get("character_id")
     if not CharacterID:
         return render(request, "404.html")
@@ -1204,15 +1116,8 @@ def public_status(request):
 
     return render(request, 'public_status_update.html', {"characters":characters})
 
-def browse(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
+@normal_user_check
+def browse(request): 
     search_type = request.GET.get("type", "characters")
 
     characters = Characters.objects.all().filter(is_public=True).order_by('-TotalChats', 'Name')
@@ -1223,16 +1128,9 @@ def browse(request):
         no_characters = True
     return render(request, 'browse.html', {'characters': characters, 'no_characters': no_characters, "users":users, "search_type": search_type})
 
+@normal_user_check
 @csrf_exempt
 def search_results(request):
-    if not request.user.is_authenticated:
-        ms.error(request, "Not logged in")
-        return redirect("homepage")
-
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-    
     if request.method != "GET":
         return render(request, "404.html")
     user_search = request.GET.get('user_search', '')
@@ -1291,13 +1189,8 @@ def delete_black_messages(request):
         if message.chatid not in chatids:
             message.delete()
 
+@admin_user_check
 def test(request):
-    if not request.user.is_authenticated or not request.user.is_staff:
-        return render(request, "404.html")
-    is_banned = Status.objects.get(accountid=request.user).is_banned
-    if is_banned:
-        return render(request, "Banned.html")
-
     Sta = Status.objects.get(accountid=request.user)
     Sta.Generate_status = False
     Sta.save()
