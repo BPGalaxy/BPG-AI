@@ -119,9 +119,9 @@
 
 <div id="chat-box"
     hx-get="/chats/load_messages/?chat_id={{chat_id}}"
-     hx-trigger="every 1s"
-     hx-swap="innerHTML">
-                {% include 'chats/get_messages.html' %}
+    hx-trigger="refresh"
+    hx-swap="innerHTML">
+        {% include 'chats/get_messages.html' %}
 {% endblock %}
 
 {% block footer %}

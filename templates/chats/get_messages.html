@@ -3,6 +3,7 @@
 
                 {% if msg.text == "Generating" %}
                     <div class="message ai loader" id="responseDiv{{msg.id}}">
+                        <p id="generating_text"></p>
                         <div class="dot"></div>
                         <div class="dot"></div>
                         <div class="dot"></div>
@@ -107,23 +108,30 @@
                 </script>
             {% endfor %}
 </div>
-<script>
-    function togglePolling() {
-        const container = document.getElementById('chat-box');
 
-        if ({{ GenerateStatus }}) {
-            if (!container.hasAttribute('hx-trigger')) {
-                container.removeAttribute('hx-disable');
-                reload()
+<script>
+    const generatingText = document.getElementById('generating_text');
+    const generatingTextEdit = document.getElementById('GenerateEditInput');
+    if (generatingText) {
+        const responseDiv = generatingText.closest('.loader');
+        const chatId = '{{ chat_id|urlencode }}';
+        const es = new EventSource(`/stream_chat/?chat_id=${chatId}`);
+        es.onmessage = e => {
+            if (e.data === '[DONE]') {
+                htmx.trigger("#chat-box", "refresh");
+                es.close();
+                return;
             }
-        } else {
-            container.setAttribute('hx-disable', '');
-
-        }
+            if (responseDiv && responseDiv.classList.contains('loader')) {
+                responseDiv.classList.remove('loader');
+                responseDiv.querySelectorAll('.dot').forEach(dot => dot.remove());
+            }
+            generatingText.textContent += e.data;
+        };
+        es.onerror = e => {
+            console.error('An error occurred', e);
+        };
     }
-    setInterval(togglePolling, 10);
-</script>
-<script>
     function copyText(PID) {
         const textToCopy = document.getElementById("contentP"+PID).innerText;
         document.execCommand(textToCopy)

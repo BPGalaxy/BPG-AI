@@ -26,4 +26,5 @@ urlpatterns = [
     path("search_results/", views.search_results, name="search_results"),
     path("public_status/", views.public_status, name="public_status"),
     path("test/", views.test, name="test"),
+    path("stream_chat/", views.stream_chat, name="stream_chat")
 ]
