@@ -71,8 +71,9 @@
 
 {% block content %}
 <div style="height:100%"></div>
-            <div class="form_container" style="margin:0px auto 0px auto;">
-                {% if user_status.is_owner %}
+      <div class="form_container" style="margin:0px auto 0px auto;">
+
+        {% if user_status.is_owner %}
             <span class="pill badge-owner" onclick="showModal('owner')" style="margin-bottom: 4px;">★ Owner</span>
         {% endif %}
         {% if user_status.is_developer %}
@@ -80,6 +81,16 @@
         {% endif %}
         {% if user_status.is_staff %}
             <span class="pill badge-staff" onclick="showModal('staff')" style="margin-bottom: 4px;">Staff</span>
+        {% endif %}
+        {% if show_announcement %}
+          <div class="overlay open" id="Aoverlay" onclick="AhandleOverlayClick(event)">
+                  <div class="modal staff" id="Amodal">
+                    <span class="modal-level" style="font-size: 21px; font-weight: bold;">Announcement</span><br>
+                    <span class="modal-level" style="font-size: 16px; font-weight: normal;">{{ announcement_version }}</span><br><br>
+                    <p class="modal-text"  id="Amodal-text">{{ announcement_text }}</p>
+                    <button class="modal-close" onclick="AcloseModal()"><span class="btn-inner">Got it</span></button>
+                  </div>
+                </div>
         {% endif %}
             </div>
                 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">

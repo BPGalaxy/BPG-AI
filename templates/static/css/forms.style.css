@@ -306,10 +306,10 @@
           .modal-close:hover { background: #f5f5f5; }
 
           /* Per-level accents */
-          .modal.staff { border-color: #4fc3f730; }
-          .modal.staff .modal-level { color: #4fc3f7; }
+          .modal.staff { border-color: #4fc3f730; background: #0d2a3a; box-shadow: 0 0 30px #00000060; }
+          .modal.staff .modal-level { color: #4fc3f7; font-family: 'Noto serif', Georgia}
 
-          .modal.dev { border-color: #e05c7a30; }
+          .modal.dev { border-color: #e05c7a30; background: #2a0d12; box-shadow: 0 0 30px #00000060; }
           .modal.dev .modal-level { color: #e05c7a; }
 
           .modal.owner { border-color: #7c4dff50; box-shadow: 0 0 30px #7c4dff18; background: #180435;}

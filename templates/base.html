@@ -306,5 +306,12 @@
     if (e.target === document.getElementById('overlay')) closeModal();
   }
 
+  function AcloseModal() {
+    document.getElementById('Aoverlay').classList.remove('open');
+  }
+
+  function AhandleOverlayClick(e) {
+    if (e.target === document.getElementById('Aoverlay')) AcloseModal();
+  }
   
 </script>
