@@ -594,6 +594,14 @@ cancelBtn.addEventListener('click', () => overlay.classList.remove('open'));
     const OccupationInput = document.getElementById("OccupationInput");
     const InterestsInput = document.getElementById("InterestsInput");
 
+    const customizationData = {
+        CustomInstructions: "{{ customization.CustomInstructions|escapejs }}",
+        Name: "{{ customization.Name|escapejs }}",
+        Emoji: "{{ customization.Emoji|escapejs }}",
+        Occupation: "{{ customization.Occupation|escapejs }}",
+        Interests: "{{ customization.Interests|escapejs }}"
+    };
+
     if (SetMenu && SetMenu) {
         SetBtn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -605,11 +613,11 @@ cancelBtn.addEventListener('click', () => overlay.classList.remove('open'));
             e.stopPropagation();
             SetMenu && SetMenu.classList.remove("open");
             const _decode = html => { const t = document.createElement('textarea'); t.innerHTML = html; return t.value; };
-            CustomInstructionsInput.value = _decode("{{customization.CustomInstructions}}");
-            NameInput.value = _decode("{{customization.Name}}");
-            EmojiInput.value = _decode("{{customization.Emoji}}");
-            OccupationInput.value = _decode("{{customization.Occupation}}");
-            InterestsInput.value = _decode("{{customization.Interests}}");
+            CustomInstructionsInput.value = _decode(customizationData.CustomInstructions);
+            NameInput.value = _decode(customizationData.Name);
+            EmojiInput.value = _decode(customizationData.Emoji);
+            OccupationInput.value = _decode(customizationData.Occupation);
+            InterestsInput.value = _decode(customizationData.Interests);
         });
     }
   (function () {
