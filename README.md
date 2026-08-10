@@ -10,3 +10,6 @@ __________________________________________________
 step 2:
 you need to install requirements.txt
 then run the server using python manage.py runserevr
+__________________________________________________
+ADMIN USERNAME = Arthur
+ADMIN PASSWORD = Arthur1234
