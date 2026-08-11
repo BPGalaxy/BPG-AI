@@ -13,6 +13,7 @@ urlpatterns = [
     path("changetheme/", views.changetheme, name="changetheme"),
     path("delete_profile/", views.delete_profile, name="delete_profile"),
     path("chats/copy_message/", views.copy_message, name="copy_message"),
+    path("announcement_save/", views.announcement_save, name="announcement_save"),
     path("get_instructions/", views.get_instructions, name="get_instructions"),
     path("delete/", views.delete_chat, name="delete_chat"),
     path("edit_message/", views.edit_message, name="edit_message"),

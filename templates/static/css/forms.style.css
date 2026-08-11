@@ -78,6 +78,7 @@
             pointer-events: none;
             border-radius: 8px;
             z-index: 1000101;
+            box-shadow: 0 4px 15px var(--frm-input-focus-glow);
         }
 
         .messagebox-close-btn{

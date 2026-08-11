@@ -41,9 +41,6 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-ANNOUNCEMENT_VERSION = "2026/08/10 Technical Issue"
-ANNOUNCEMENT_TEXT = "All users chats and messages were deleted due to a technical issue. We'll try to prevent this from happening in the future."
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

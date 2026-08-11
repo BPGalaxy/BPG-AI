@@ -402,6 +402,7 @@ RIGHT: *rubs her eyes and sets down the mug* "Didn't sleep." *looks away*
         return render(request, "forms/create_character.html", {"form": form, "user_status": user_status, "user_character_count": user_character_count})
 
 def homepage(request):
+    settings = Settings.objects.first()
     try:
         is_banned = Status.objects.get(accountid=request.user).is_banned
         user_status = Status.objects.get(accountid=request.user)
@@ -422,21 +423,24 @@ def homepage(request):
 
     day = datetime.datetime.today().day
     try:
-        Settings.objects.get(id=1).today
+        settings.today
     except:
         Settings.objects.create(today=day)
 
-    if not Settings.objects.get(id=1).today == day:
+    if not settings.today == day:
         Status.objects.all().update(remaining_messages=100)
         Settings.objects.filter(id=1).update(today=day)
 
-    current_AI = Settings.objects.get(id=1).current_AI
-    AI_Status = Settings.objects.get(id=1).AI_Status
+    current_AI = settings.current_AI
+    AI_Status = settings.AI_Status
     if AI_Status == 0:
         AI_Status = "On"
     else:
         AI_Status = "Off"
-    return render(request,'homepage.html', {"username": request.user.username, "user_status":user_status, "current_AI":current_AI, "AI_Status":AI_Status})
+    announcement_version = settings.ANNOUNCEMENT_VERSION
+    announcement_text = settings.ANNOUNCEMENT_TEXT
+    print(announcement_version)
+    return render(request,'homepage.html', {"username": request.user.username, "user_status":user_status, "current_AI":current_AI, "AI_Status":AI_Status, "announcement_version":announcement_version, "announcement_text":announcement_text})
 
 def userpage(request):
     if request.method == "POST":
@@ -992,6 +996,19 @@ def edit_message(request):
         ).start()
 
         return redirect(f"/chats/?chat_id={chat_id}")
+
+@admin_user_check
+def announcement_save(request):
+    settings = Settings.objects.first()
+    announcement_version = request.POST.get("announcement_version", "None")
+    announcement_text = request.POST.get("announcement_text", "None")
+
+    settings.ANNOUNCEMENT_VERSION = announcement_version
+    settings.ANNOUNCEMENT_TEXT = announcement_text
+    settings.save()
+
+    ms.success(request, "Announcement updated successfully")
+    return redirect("homepage")
 
 @normal_user_check
 def rename_chat(request):

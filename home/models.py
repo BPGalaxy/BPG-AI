@@ -79,3 +79,5 @@ class Settings(models.Model):
     today = models.IntegerField(default=0)
     current_AI = models.TextField(default="local")
     AI_Status = models.IntegerField(default=0)
+    ANNOUNCEMENT_VERSION = models.TextField(default="")
+    ANNOUNCEMENT_TEXT = models.TextField(default="")
