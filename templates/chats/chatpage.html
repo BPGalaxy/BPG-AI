@@ -18,6 +18,7 @@
                     <div class="dropdown-caption">
                         {{ chat_name }}
                     </div>
+                    <button class="dropdown-item" type="submit" id="MemoryBtn">AI Memory</button>
                     <button class="dropdown-item" type="submit" id="RenameBtn">Rename Chat</button>
                     <button class="dropdown-item danger" type="submit" id="DeleteBtn">Delete Chat</button>
                     <form action="{% url 'chats' %}" method="GET" style="margin: 0;">
@@ -67,6 +68,17 @@
       <h2>Rename Chat</h2>
       <input type="hidden" id="chat_id_rename" name="chat_id_rename" value="{{ chat_id }}">
       <input type="text" placeholder="Enter new chat name" id="RenameInput" name="RenameInput" value="{{chat.chatname}}" required autocomplete="off" autocapitalize="off"/><br>
+      <input type="submit" value="Done"/>
+    </form>
+</div>
+
+<div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="MemoryMenu">
+    <button class="messagebox-close-btn" id="memory-close-btn">&times;</button>
+    <form action="{% url 'memory_update' %}" method="POST" style="margin: 0;">
+        {% csrf_token %}
+      <h2>AI Memory</h2>
+      <input type="hidden" id="chat_id_memory" name="chat_id_memory" value="{{ chat_id }}">
+      <textarea class="textarea-form" placeholder="AI memory would update as you keep chatting" id="MemoryInput" name="MemoryInput" required autocomplete="off" autocapitalize="off">{{chat.summary}}</textarea><br>
       <input type="submit" value="Done"/>
     </form>
 </div>
@@ -223,13 +235,19 @@
     const DeleteMenu = document.getElementById("DeleteMenu");
     const DeleteCloseBtn = document.getElementById("delete-close-btn");
 
+    const MemoryBtn = document.getElementById("MemoryBtn");
+    const MemoryMenu = document.getElementById("MemoryMenu");
+    const MemoryInput = document.getElementById("MemoryInput");
+    const MemoryCloseBtn = document.getElementById("memory-close-btn");
+
     if (RenameMenu && RenameMenu) {
         RenameBtn.addEventListener("click", (e) => {
-            DeleteMenu && DeleteMenu.classList.remove("open")
+            MemoryMenu && MemoryMenu.classList.remove("open");
+            DeleteMenu && DeleteMenu.classList.remove("open");
             e.stopPropagation();
             const isOpen = RenameMenu.classList.contains("open");
             closeAllMenus();
-            if (!isOpen) {RenameMenu.classList.add("open") ; RenameInput.value="{{chat.chatname}}"; RenameInput.focus(); RenameInput.select()};
+            if (!isOpen) {RenameMenu.classList.add("open") ; RenameInput.value="{{chat.chatname|escapejs}}"; RenameInput.focus(); RenameInput.select()};
         });
         RenameCloseBtn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -237,9 +255,25 @@
         });
     }
 
+    if (MemoryMenu && MemoryBtn) {
+        MemoryBtn.addEventListener("click", (e) => {
+            RenameMenu && RenameMenu.classList.remove("open");
+            DeleteMenu && DeleteMenu.classList.remove("open");
+            e.stopPropagation();
+            const isOpen = MemoryMenu.classList.contains("open");
+            closeAllMenus();
+            if (!isOpen) {MemoryMenu.classList.add("open") ; MemoryInput.value="{{chat.summary|escapejs}}"; MemoryInput.focus(); MemoryInput.select()};
+        });
+        MemoryCloseBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            MemoryMenu && MemoryMenu.classList.remove("open");
+        });
+    }
+    
     if (DeleteMenu && DeleteMenu) {
         DeleteBtn.addEventListener("click", (e) => {
             RenameMenu && RenameMenu.classList.remove("open");
+            MemoryMenu && MemoryMenu.classList.remove("open");
             e.stopPropagation();
             const isOpen = DeleteMenu.classList.contains("open");
             closeAllMenus();

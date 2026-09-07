@@ -1,8 +1,5 @@
 from django import forms
 
-from django import forms
-
-
 class CharacterPrompt(forms.Form):
     Genders = [
         ('Male', 'Male'),

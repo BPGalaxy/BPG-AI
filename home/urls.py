@@ -19,6 +19,7 @@ urlpatterns = [
     path("edit_message/", views.edit_message, name="edit_message"),
     path("chats/load_messages/", views.load_messages, name="load_messages"),
     path("rename-chat/", views.rename_chat, name="rename_chat"),
+    path("update-memory/", views.memory_update, name="memory_update"),
     path("create_character/", views.create_character, name="create_character"),
     path("user_characters/", views.user_characters, name="user_characters"),
     path("create_conversation/", views.create_conversation, name="create_conversation"),

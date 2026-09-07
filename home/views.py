@@ -99,7 +99,8 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
                     continue
 
         else:
-            model = "google/gemma-4-26b-a4b-it:free"
+            #google/gemma-4-26b-a4b-it:free
+            model = "z-ai/glm-5.3-flash"
             response = requests.post(
                 url="https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -1011,6 +1012,19 @@ def announcement_save(request):
     return redirect("homepage")
 
 @normal_user_check
+def memory_update(request):
+    chat_id = request.POST.get("chat_id_memory", "None")
+    if chat_id == "None":
+        return render(request, "404.html")
+    MemoryInput = request.POST.get("MemoryInput", "None")
+    account_id = request.user
+    target_chat = Chats.objects.get(accountid=account_id, chatid=chat_id)
+    target_chat.summary = MemoryInput
+    target_chat.save()
+    ms.success(request, "Chat memory updated successfully")
+    return redirect(f"/chats/?chat_id={chat_id}")
+
+@normal_user_check
 def rename_chat(request):
     chat_id = request.POST.get("chat_id_rename", "None")
     if chat_id == "None":
@@ -1018,7 +1032,6 @@ def rename_chat(request):
     RenameInput = request.POST.get("RenameInput", "None")
     account_id = request.user
     target_chat = Chats.objects.get(accountid=account_id, chatid=chat_id)
-
     chat_name = Chats.objects.get(accountid=account_id, chatid=chat_id).chatname
     if chat_name == "New Chat":
         ms.error(request, "You can't rename a just created chat")
