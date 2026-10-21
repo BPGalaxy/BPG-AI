@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block header_title %}
+    <div style="display: flex;">
+        <div class="header-title" >Site Settings</div>
+    </div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block topscript %}
+    {% include 'static/js/theme-switcher.js' %}
+{% endblock %}
+  
+{% block style %}
+    {% include 'static/css/forms.style.css' %}
+
+    {% include 'static/css/theme-toggle-btn.css' %}
+        .sp-main { box-sizing: border-box; padding: 20px 16px 70px 16px; }
+    .sp-card { background: var(--clr-purple-ai-bg); border: 1px solid var(--clr-purple-bar-border);
+               border-radius: 14px; padding: 16px 18px; margin-bottom: 18px; transition: all 0.3s ease; }
+    .sp-card:hover { box-shadow: 0 0 10px var(--clr-purple-bar-border-glow), inset 0 1px 0 var(--clr-input-shadow);
+                     border-color: var(--clr-purple-border-dark); }
+    .sp-card h3 { font-family: 'Noto Serif', serif; font-size: 16px; color: var(--clr-lavender-header);
+                  margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--clr-purple-divider); }
+    .sp-field { margin-bottom: 14px; }
+    .sp-field:last-child { margin-bottom: 0; }
+    .sp-field input, .sp-field textarea, .sp-field select {
+      display: block; width: 100%; box-sizing: border-box; padding: 11px 14px;
+      border-radius: 8px; border: 1px solid var(--clr-purple-border-dark);
+      background: var(--clr-purple-input-bg); color: var(--clr-lavender-lighter);
+      font-family: Fredoka, sans-serif; font-size: 15px; transition: all 0.3s ease; }
+    .sp-field textarea { resize: vertical; line-height: 1.4; }
+    .sp-field select { cursor: pointer; color-scheme: dark; }
+    .sp-field input:focus, .sp-field textarea:focus, .sp-field select:focus {
+      outline: none; border-color: var(--clr-lavender-light);
+      box-shadow: 0 0 12px var(--clr-purple-glow), inset 0 1px 0 var(--clr-input-shadow); }
+    .sp-error { font-family: Fredoka, Arial; font-size: 12.5px; color: var(--clr-danger-light); margin-top: 4px; }
+    .sp-msg { font-family: Fredoka, Arial; font-size: 14px; background: var(--clr-green-dark);
+              color: var(--clr-green-light); border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; }
+{% endblock %}
+
+{% block content %}
+  <div class="parent-container">
+    <main class="sp-main">
+ 
+      <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="sp-error">{{ form.non_field_errors }}</div>{% endif %}
+ 
+        {% for title, fields in sections %}
+        <section class="sp-card">
+          <h3>{{ title }}</h3>
+          {% for f in fields %}
+          <div class="sp-field">
+            <label class="features-label" for="{{ f.id_for_label }}">{{ f.name }}</label>
+            {{ f }}
+            {% if f.name == "API_KEY" %}
+              <label class="features-label description">{% if has_key %}A key is currently set.{% else %}No key set yet.{% endif %}</label>
+            {% endif %}
+            {% for e in f.errors %}<div class="sp-error">{{ e }}</div>{% endfor %}
+          </div>
+          {% endfor %}
+        </section>
+        {% endfor %}
+ 
+        <button type="submit" class="start-conversation-btn">Save changes</button>
+      </form>
+    </main>
+  </div>
+
+{% endblock %}

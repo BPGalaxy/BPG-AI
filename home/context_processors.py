@@ -7,6 +7,9 @@ def announcement(request):
 
     ANNOUNCEMENT_VERSION = settings.ANNOUNCEMENT_VERSION
     ANNOUNCEMENT_TEXT = settings.ANNOUNCEMENT_TEXT
+
+    if ANNOUNCEMENT_VERSION == "":
+        return {}
     
     seen = request.session.get("seen_announcement") == ANNOUNCEMENT_VERSION
     

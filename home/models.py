@@ -78,6 +78,12 @@ class Characters(models.Model):
 class Settings(models.Model):
     today = models.IntegerField(default=0)
     current_AI = models.TextField(default="local")
+    AI_name = models.TextField(default="google/gemma-4-26b-a4b-it:free")
     AI_Status = models.IntegerField(default=0)
+    memoryLimit = models.IntegerField(default=6)
+    updateSummary = models.IntegerField(default=12)
     ANNOUNCEMENT_VERSION = models.TextField(default="")
     ANNOUNCEMENT_TEXT = models.TextField(default="")
+    API_KEY = models.TextField(default="")
+    nonrp_system_prompt = models.TextField(default="You are a helpful assistant.")
+    rp_system_prompt = models.TextField(default="You are not an AI model or assistant but a human with a name and personality.")

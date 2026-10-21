@@ -57,6 +57,7 @@ body {
             flex-direction: column;
             height: 100%;
             color: var(--clr-ai-text-light);
+            
         }
 
         * {
@@ -160,12 +161,16 @@ body {
 
         .icon-btn:hover {
             background: var(--clr-purple-deep);
-            box-shadow: 0 0px 10px var(--clr-purple-bar-border-glow), inset 0 1px 0 var(--clr-input-shadow);
+            border-color: var(--clr-purple-glow);
+            box-shadow: 0 6px 16px rgba(120,68,219,0.35), inset 0 1px 0 var(--clr-input-shadow);
+            transform: translateY(-2px) scale(1.05);
         }
 
         .icon-btn:active {
-            transform: scale(0.96);
+            transform: translateY(1px) scale(0.95);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
+
 
         .icon-user::before {
             content: "";
@@ -236,6 +241,13 @@ body {
           gap: 14px;
           transition: all 0.3s ease;
         }
+        
+        .features-div:hover {
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 20px var(--clr-purple-bar-border-glow),
+            inset 0 1px 0 var(--clr-input-shadow);
+          transform: translateY(-4px) translateZ(10px) rotateX(1deg);
+          border-color: var(--clr-purple-border-dark);
+        }
 
         .features-label-link {
             display:flex;
@@ -251,6 +263,7 @@ body {
             font-family: Domine, Arial;
             transition: all 0.3s ease;
         }
+
         .features-label-link:hover, .features-div:hover {
           box-shadow: 0 0px 10px var(--clr-purple-bar-border-glow),
             inset 0 1px 0 var(--clr-input-shadow);
@@ -262,7 +275,7 @@ body {
             letter-spacing: 0.04em;
             position: relative;
             overflow: hidden;
-            animation: pulse-border 2.5s ease-in-out infinite;
+            animation: pulse-border 2.5s ease-in-out infinite, float3d 3s ease-in-out infinite alternate;
         }
 
         .features-label-link.browse::before {
@@ -295,7 +308,7 @@ body {
             0%, 100% { box-shadow: 0 0 6px rgba(160,100,255,0.25); }
             50%       { box-shadow: 0 0 14px rgba(160,100,255,0.5); }
         }
-
+        
         .dropdown-menu {
             font-family: Fredoka, sans-serif;
             position: absolute;
@@ -483,6 +496,7 @@ body {
             border: none;
             margin-top: -10px;
             cursor: pointer;
+
         }
         .input-area {
             position: fixed;
@@ -513,6 +527,7 @@ body {
                       inset 0 1px 0 var(--clr-input-shadow);
           box-sizing: border-box;
           min-height: 45px;
+
       }
 
         .input-area button, .yesnobtn {
@@ -872,7 +887,7 @@ body {
   cursor: pointer;
   background: var(--clr-purple-deep);
   border: 1px solid var(--clr-purple-border-dark);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
               0 0 20px var(--clr-purple-bar-border-glow);
   display: flex;
@@ -1005,6 +1020,7 @@ body {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(230, 216, 255, 0.3);
 }
+
 
 /* Gold theme character cards */
 [data-theme="gold"] {

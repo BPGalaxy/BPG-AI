@@ -281,7 +281,7 @@
   const config = {
     staff: { icon: '🔵', text: 'You have <span class="modal-level">Staff</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel" /><br></form></div>' },
     dev:   { icon: '🔴', text: 'You have <span class="modal-level">Developer</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/></form></div>' },
-    owner: { icon: '✦',  text: 'You have <span class="modal-level">Owner</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/></form>           <form action="/switch_AI" method="GET"><input class="modal-close" type="submit" value="Switch AI Model (current: {{current_AI}})"/><br></form><form action="/AI_Status" method="GET"><input class="modal-close" type="submit" value="Set AI Status to {{AI_Status}}"/><br></form><br></div>' },
+    owner: { icon: '✦',  text: 'You have <span class="modal-level">Owner</span> level access to this site', buttons: '<form action="/admin" method="GET"><input class="modal-close" type="submit" value="Open Admin Panel"/><br></form><form action="/settings" method="GET"><input class="modal-close" type="submit" value="Open Settings Panel"/></form><form action="/test" method="GET"><input class="modal-close" type="submit" value="Trigger test"/><br></div>'},
     vip:   { icon: '♦',  text: 'You are a <span class="modal-level">VIP</span> user.<br> You have access to following features:<br><br><span class="modal-level">Customizing your AI responds with giving custom instructions to AI</span><br><div class="dropdown-divider" style="margin: 6px 0;  border-top: 1px solid #c89000;"></div><span class="modal-level">Creating and customizing your own roleplay character</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Respond prority in high traffic times</span><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Unlimited messages (No daily limit)</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div> <span class="modal-level">Up to 15 exclusive colors to customize your profile look</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Exclusive golden theme</span><br><button id="theme-toggle-btn" style="margin-top:5px;"><span class="btn-inner"></span></button>', buttons: '' },
     notvip:   { icon: '♦',  text: 'With <span class="modal-level">VIP</span> subscription.<br> You will have access to following features:<br><br><span class="modal-level">Customizing your AI responds with giving custom instructions to AI</span><br><div class="dropdown-divider" style="margin: 6px 0;  border-top: 1px solid #c89000;"></div><span class="modal-level">Creating and customizing your own roleplay character</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Respond prority in high traffic times</span><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Unlimited messages (No daily limit)</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div> <span class="modal-level">Up to 15 exclusive colors to customize your profile look</span><br><div class="dropdown-divider" style="margin: 6px 0; border-top: 1px solid #c89000;"></div><span class="modal-level">Exclusive golden theme</span><br>', buttons: '' },
     };
@@ -313,4 +313,29 @@
   function AhandleOverlayClick(e) {
     if (e.target === document.getElementById('Aoverlay')) AcloseModal();
   }
+
+  // Lightweight 3D Card Tilt Interaction
+  document.addEventListener('mousemove', (e) => {
+    const card = e.target.closest('.on-profile,.features-div, .card, [data-tilt]');
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -7;
+    const rotateY = ((x - centerX) / centerX) * 7;
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    const card = e.target.closest('.on-profile, .features-div, .card, [data-tilt]');
+    if (card && !card.contains(e.relatedTarget)) {
+      card.style.transform = '';
+    }
+  });
 </script>

@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from .forms import CharacterPrompt
 from dotenv import load_dotenv
+from django.contrib.auth.decorators import user_passes_test
 from functools import wraps
 from time import sleep
 from .models import *
@@ -15,7 +16,8 @@ import datetime
 import requests
 import random
 import json
-import os
+from .forms import SettingsForm
+
 
 def normal_user_check(view_func):
     @wraps(view_func)
@@ -100,11 +102,14 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
 
         else:
             #google/gemma-4-26b-a4b-it:free
-            model = "z-ai/glm-5.3-flash"
+            #z-ai/glm-5.3-flash
+            settings = Settings.objects.get(id=1)
+            model = settings.AI_name
+            API_KEY = settings.API_KEY
             response = requests.post(
                 url="https://openrouter.ai/api/v1/chat/completions",
                 headers={
-                    "Authorization": f"Bearer {open('.env/API_KEY.txt', 'r').read()}",
+                    "Authorization": f"Bearer {API_KEY}",
                     "Content-Type": "application/json",
                 },
                 data=json.dumps({
@@ -116,10 +121,12 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
                         {"role": "user", "content": '\nLast user message: ' + user_message + "- Your responses don't have to exceed 100 words.\n"
                                                      '- never include "ai message:" at the start of your response.'}
                     ],
+                    "temperature": 0.9,
                     "reasoning": {"enabled": True},
                 }),
             )
             response_data = response.json()
+            print(response_data)
             ai_message = response_data['choices'][0]['message']
             full_response = ai_message.get('content', '')
             _set_generation_cache(user_pk, chat_id, "running", text=full_response)
@@ -141,63 +148,94 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
         status_obj.save()
         _set_generation_cache(user_pk, chat_id, "error", text=str(e), error=str(e))
 
-@admin_user_check
-def switch_AI(request):
-    settings = Settings.objects.get(id=1)
-    if settings.current_AI == "local":
-        settings.current_AI = "online"
-        settings.save()
-        ms.info(request, "AI model set to online")
-    else:
-        settings.current_AI = "local"
-        settings.save()
-        ms.info(request, "AI model set to local")
-    settings.save()
-    
-    return redirect("homepage")
+SECTIONS = [
+    ("AI", ["current_AI", "AI_name", "AI_Status", "API_KEY"]),
+    ("Memory", ["memoryLimit", "updateSummary"]),
+    ("Announcement", ["ANNOUNCEMENT_VERSION", "ANNOUNCEMENT_TEXT"]),
+    ("System prompts", ["nonrp_system_prompt", "rp_system_prompt"]),
+]
 
 @admin_user_check
-def AI_Status(request):
-    settings = Settings.objects.get(id=1)
-    if settings.AI_Status == 0:
-        settings.AI_Status = 1
-        settings.save()
-        ms.info(request, "AI Status set to on")
-    else:
-        settings.AI_Status = 0
-        settings.save()
-        ms.info(request, "AI Status set to off")
-    settings.save()
-    
-    return redirect("homepage")
+@user_passes_test(lambda u: u.is_superuser)
+def settings_panel(request):
+    obj = Settings.objects.get(id=1)
+    form = SettingsForm(request.POST or None, instance=obj)
+    print(form.errors)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        ms.success(request, "Settings saved.")
+        return redirect("settings_panel")
+ 
+    sections = [(title, [form[name] for name in names]) for title, names in SECTIONS]
+    return render(request, "settings_panel.html", {
+        "form": form,
+        "sections": sections,
+        "has_key": bool(obj.API_KEY),
+    })
 
 def generate_summary(request, user_message, system_message, chat_id):
     GenerateStatus = Status.objects.get( accountid=request.user)
     GenerateStatus.Generate_status = True
     GenerateStatus.save()
-    url = "http://localhost:11434/api/chat"
-    model = "fluffy/l3-8b-stheno-v3.2"
-    payload = {
-        "model": model,
+
+    settings = Settings.objects.get(id=1)
+    current_AI = settings.current_AI
+    if current_AI == "local":
+        url = "http://localhost:11434/api/chat"
+        model = "fluffy/l3-8b-stheno-v3.2"
+        payload = {
+            "model": model,
             "messages": [
                 {"role":"system", "content":system_message},
                 {"role": "user", "content": user_message}
             ],
             "stream": False
-    }
-    try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()
-        answer = response.json()["message"]["content"]
+        }
+        try:
+            response = requests.post(url, json=payload)
+            response.raise_for_status()
+            answer = response.json()["message"]["content"]
 
-        chat = Chats.objects.get(chatid=chat_id)
-        chat.summary = answer
-        chat.save()
+            chat = Chats.objects.get(chatid=chat_id)
+            chat.summary = answer
+            chat.save()
 
-        return "Chat summary updated"
+            return "Chat summary updated"
 
-    except requests.exceptions.RequestException as e:
-        return e
+        except requests.exceptions.RequestException as e:
+            return e
+    else:
+        model = settings.AI_name
+        API_KEY = settings.API_KEY
+        try:
+            response = requests.post(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                data=json.dumps({
+                    "model": model,
+                    "messages": [
+                        {"role":"system", "content":system_message},
+                        {"role": "user", "content": user_message}
+                    ],
+                    "temperature": 0.9,
+                    "reasoning": {"enabled": True},
+                }),
+            )
+            response.raise_for_status()
+            answer = response.json()['choices'][0]['message']['content']
+
+            chat = Chats.objects.get(chatid=chat_id)
+            chat.summary = answer
+            chat.save()
+
+            return "Chat summary updated"
+
+        except requests.exceptions.RequestException as e:
+            return e
+    
 
 def stream_chat(request):
     if not request.user.is_authenticated:
@@ -242,11 +280,13 @@ def stream_chat(request):
     interests_line = f"{Name}'s interests: {Interests}\n. These are what the user ({Name}) is interested to." if Interests else ""
 
     if is_rp:
-        system_instructions = f"{ai_prompt}\n{open('.env/rp_system_prompt.txt', 'r').read()}"
+        rp_system_prompt = Settings.objects.get(id=1).rp_system_prompt
+        system_instructions = f"{ai_prompt}\n{rp_system_prompt}"
     else:
+        nonrp_system_prompt = Settings.objects.get(id=1).nonrp_system_prompt
         system_instructions = (
             "[IMPORTANT GUIDELINES]\n" +
-            open('.env/nonrp_system_prompt.txt', 'r').read() +
+            nonrp_system_prompt +
             f"\nYOUR NAME: Amelia\n"
             f"[USER INFORMATION]\n"
             f"User's name:{Name}. Always call user {Name} unless they ask otherwise.\n"
@@ -261,7 +301,7 @@ def stream_chat(request):
 
     messages_before = messages.filter(id__lt=generating_message.id)
     conversation = ""
-    memory_limit = 6
+    memory_limit = Settings.objects.get(id=1).memoryLimit
 
     if messages_before.count() > memory_limit:
         conversation_list = [f"{message.senderuser}: {message.text}" for message in messages_before]
@@ -403,7 +443,6 @@ RIGHT: *rubs her eyes and sets down the mug* "Didn't sleep." *looks away*
         return render(request, "forms/create_character.html", {"form": form, "user_status": user_status, "user_character_count": user_character_count})
 
 def homepage(request):
-    settings = Settings.objects.first()
     try:
         is_banned = Status.objects.get(accountid=request.user).is_banned
         user_status = Status.objects.get(accountid=request.user)
@@ -424,10 +463,12 @@ def homepage(request):
 
     day = datetime.datetime.today().day
     try:
+        settings = Settings.objects.get(id=1)
         settings.today
     except:
         Settings.objects.create(today=day)
 
+    settings = Settings.objects.get(id=1)
     if not settings.today == day:
         Status.objects.all().update(remaining_messages=100)
         Settings.objects.filter(id=1).update(today=day)
@@ -438,10 +479,10 @@ def homepage(request):
         AI_Status = "On"
     else:
         AI_Status = "Off"
+    AI_name = settings.AI_name
     announcement_version = settings.ANNOUNCEMENT_VERSION
     announcement_text = settings.ANNOUNCEMENT_TEXT
-    print(announcement_version)
-    return render(request,'homepage.html', {"username": request.user.username, "user_status":user_status, "current_AI":current_AI, "AI_Status":AI_Status, "announcement_version":announcement_version, "announcement_text":announcement_text})
+    return render(request,'homepage.html', {"username": request.user.username, "user_status":user_status, "current_AI":current_AI, "AI_Status":AI_Status, "AI_name":AI_name, "announcement_version":announcement_version, "announcement_text":announcement_text})
 
 def userpage(request):
     if request.method == "POST":
@@ -575,9 +616,11 @@ def handle_text(request):
     OccupationLine = f"{Name}'s occupation: {Occupation}\n" if Occupation else ""
     InterestsLine = f"{Name}'s interests: {Interests}\n. These are what the user ({Name}) is interested to." if Interests else ""
     if is_rp:
-        systemInstructions = (f"{AI_Prompt}\n"+str(open(".env/rp_system_prompt.txt", "r").read()))
+        rp_system_prompt = Settings.objects.get(id=1).rp_system_prompt
+        systemInstructions = (f"{AI_Prompt}\n"+rp_system_prompt)
     else:
-        systemInstructions = (open(".env/nonrp_system_prompt.txt", "r").read()+
+        nonrp_system_prompt = Settings.objects.get(id=1).nonrp_system_prompt
+        systemInstructions = (nonrp_system_prompt+
                               f"[USER INFORMATION]\n"
                                   f"User's name:{Name}. Always call user {Name} unless they ask otherwise.\n"
                                   f"{CustomInstructionsLine}"
@@ -609,8 +652,10 @@ def handle_text(request):
 
         conversationList = []
         conversation = "" 
-        memoryLimit = 6
-        updateSummary = 12
+
+        settings = Settings.objects.get(id=1)
+        memoryLimit = settings.memoryLimit
+        updateSummary = settings.updateSummary
         if messages.count() > memoryLimit:
             for message in messages:
                 conversationList.append(f"{message.senderuser}: {message.text}")
@@ -698,10 +743,10 @@ def handle_text(request):
         GenerateStatusTrue.Generate_status = True
         GenerateStatusTrue.save()
 
-        current_ai = Settings.objects.get(id=1).current_AI
+        current_AI = Settings.objects.get(id=1).current_AI
         threading.Thread(
             target=generate_reply_in_background,
-            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, conversation, user_input, current_ai),
+            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, conversation, user_input, current_AI),
             daemon=True,
         ).start()
 
@@ -927,7 +972,7 @@ def edit_message(request):
     is_rp = Chats.objects.get(chatid=chat_id).is_rp
     conversationList = []
     conversation = ""
-    memoryLimit = 6
+    memoryLimit = Settings.objects.get(id=1).memoryLimit
 
     CustomInstructions = Customization.objects.get(accountid=request.user).CustomInstructions
     Name = Customization.objects.get(accountid=request.user).Name
@@ -942,9 +987,11 @@ def edit_message(request):
     InterestsLine = f"{Name}'s interests: {Interests}\n. These are what {Name} is interested to." if Interests else ""
 
     if is_rp:
-        systemInstructions = (f"{AI_Prompt}\n"+str(open(".env/rp_system_prompt.txt", "r").read()))
+        rp_system_prompt = Settings.objects.get(id=1).rp_system_prompt
+        systemInstructions = (f"{AI_Prompt}\n"+rp_system_prompt)
     else:
-        systemInstructions = ("[IMPORTANT GUIDELINES]\n"+open(".env/nonrp_system_prompt.txt", "r").read()+
+        nonrp_system_prompt = Settings.objects.get(id=1).nonrp_system_prompt
+        systemInstructions = ("[IMPORTANT GUIDELINES]\n"+nonrp_system_prompt+
                               f"\nYOUR NAME: Amelia\n"
                               f"[USER INFORMATION]\n"
                                   f"User's name:{Name}. Always call user {Name} unless they ask otherwise.\n"
@@ -989,10 +1036,10 @@ def edit_message(request):
         GenerateStatusTrue.Generate_status = True
         GenerateStatusTrue.save()
 
-        current_ai = Settings.objects.get(id=1).current_AI
+        current_AI = Settings.objects.get(id=1).current_AI
         threading.Thread(
             target=generate_reply_in_background,
-            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, conversation, user_input, current_ai),
+            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, conversation, user_input, current_AI),
             daemon=True,
         ).start()
 

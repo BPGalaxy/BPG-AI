@@ -3,8 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.homepage, name="homepage"),
-    path("switch_AI/", views.switch_AI, name="switch_AI"),
-    path("AI_Status/", views.AI_Status, name="AI_Status"),
+    path("settings/", views.settings_panel, name="settings_panel"),
     path("handle-text/", views.handle_text, name="handle_text"),
     path("new_chat/", views.new_chat, name="new_chat"),
     path("chats/", views.chats, name="chats"),
