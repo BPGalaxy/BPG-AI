@@ -1,9 +1,29 @@
+<style>
+    .rich-message { overflow-wrap: anywhere; }
+    .rich-message > :first-child { margin-top: 0; }
+    .rich-message > :last-child { margin-bottom: 0; }
+    .rich-message :is(h1, h2, h3, h4, h5, h6) { line-height: 1.2; margin: 1em 0 .45em; }
+    .rich-message h1 { font-size: 1.55em; }
+    .rich-message h2 { font-size: 1.3em; }
+    .rich-message h3 { font-size: 1.12em; }
+    .rich-message p { margin: .65em 0; }
+    .rich-message :is(ul, ol) { margin: .65em 0; padding-left: 1.4em; }
+    .rich-message blockquote { border-left: 3px solid currentColor; margin: .8em 0; padding-left: .8em; opacity: .85; }
+    .rich-message :not(pre) > code { padding: .12em .35em; border-radius: .35em; background: color-mix(in srgb, currentColor 13%, transparent); }
+    .rich-message pre { overflow-x: auto; padding: .85em 1em; border-radius: .6em; background: #1e1630; color: #f4efff; }
+    .rich-message pre code { font-family: Consolas, "Courier New", monospace; }
+    .rich-message a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+    .rich-message table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: .8em 0; }
+    .rich-message :is(th, td) { border: 1px solid currentColor; padding: .35em .55em; text-align: left; }
+    .rich-message li { font-family: Fredoka, sans-serif; }
+</style>
+<script>{% include 'static/js/marked.min.js' %}</script>
 <div id="chat" class="chat-container">
             {% for msg in messagess %}
 
                 {% if msg.text == "Generating" %}
                     <div class="message ai loader" id="responseDiv{{msg.id}}">
-                        <p id="generating_text"></p>
+                        <div id="generating_text" class="rich-message" data-rich-message></div>
                         <div class="dot"></div>
                         <div class="dot"></div>
                         <div class="dot"></div>
@@ -14,7 +34,7 @@
                         {% if msg == last_ai_message %}
                             <div style="display: flex;">
                                 <div class="{{ msg.senderuser }}" id="responseDiv{{msg.id}}">
-                                    <p id="contentP{{msg.id}}">{{ msg.text }}</p>
+                                    <div id="contentP{{msg.id}}" class="rich-message" data-rich-message>{{ msg.text }}</div>
                                     <div style="display: none" id="editInput{{msg.id}}">
                                         <form style="display: flex;  width: 100%;" action="{% url 'edit_message' %}" method="POST">
                                             {% csrf_token %}
@@ -40,7 +60,7 @@
                         {% else %}
                             <div style="display: flex">
                                 <div class="{{ msg.senderuser }}" id="responseDiv{{msg.id}}">
-                                    <p id="contentP{{msg.id}}">{{ msg.text }}</p>
+                                    <div id="contentP{{msg.id}}" class="rich-message" data-rich-message>{{ msg.text }}</div>
                                 </div>
                             </div>
                             <button onclick="copyText({{msg.id}})" class="options-btn"><svg data-v-3b185968="" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-md-heavy"><path data-v-3b185968="" fill-rule="evenodd" clip-rule="evenodd" d="M7 5C7 3.34315 8.34315 2 10 2H19C20.6569 2 22 3.34315 22 5V14C22 15.6569 20.6569 17 19 17H17V19C17 20.6569 15.6569 22 14 22H5C3.34315 22 2 20.6569 2 19V10C2 8.34315 3.34315 7 5 7H7V5ZM9 7H14C15.6569 7 17 8.34315 17 10V15H19C19.5523 15 20 14.5523 20 14V5C20 4.44772 19.5523 4 19 4H10C9.44772 4 9 4.44772 9 5V7ZM5 9C4.44772 9 4 9.44772 4 10V19C4 19.5523 4.44772 20 5 20H14C14.5523 20 15 19.5523 15 19V10C15 9.44772 14.5523 9 14 9H5Z" fill="currentColor"></path></svg></button>
@@ -110,6 +130,47 @@
 </div>
 
 <script>
+    const allowedRichTags = new Set(['A', 'BLOCKQUOTE', 'BR', 'CODE', 'DEL', 'EM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR', 'LI', 'OL', 'P', 'PRE', 'STRONG', 'TABLE', 'TBODY', 'TD', 'TH', 'THEAD', 'TR', 'UL']);
+
+    function renderRichMessage(element, markdown) {
+        element.dataset.rawMarkdown = markdown;
+        const escapedMarkdown = markdown
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;');
+        const output = typeof marked === 'undefined'
+            ? document.createTextNode(markdown)
+            : sanitizeRichHtml(marked.parse(escapedMarkdown, { breaks: true, gfm: true }));
+        element.replaceChildren(output);
+    }
+
+    function sanitizeRichHtml(html) {
+        const documentFragment = document.createDocumentFragment();
+        const parsed = new DOMParser().parseFromString(html, 'text/html');
+        [...parsed.body.childNodes].forEach(node => documentFragment.append(node));
+
+        documentFragment.querySelectorAll('*').forEach(element => {
+            if (!allowedRichTags.has(element.tagName)) {
+                element.replaceWith(...element.childNodes);
+                return;
+            }
+            [...element.attributes].forEach(attribute => {
+                const allowed = (element.tagName === 'A' && ['href', 'title'].includes(attribute.name)) ||
+                    (element.tagName === 'CODE' && attribute.name === 'class' && /^language-[\w-]+$/.test(attribute.value));
+                if (!allowed) element.removeAttribute(attribute.name);
+            });
+            if (element.tagName === 'A' && element.hasAttribute('href')) {
+                try {
+                    const url = new URL(element.href, window.location.origin);
+                    if (!['http:', 'https:', 'mailto:'].includes(url.protocol)) element.removeAttribute('href');
+                } catch {
+                    element.removeAttribute('href');
+                }
+            }
+        });
+        return documentFragment;
+    }
+
     const generatingText = document.getElementById('generating_text');
     const generatingTextEdit = document.getElementById('GenerateEditInput');
     if (generatingText) {
@@ -126,7 +187,7 @@
                 responseDiv.classList.remove('loader');
                 responseDiv.querySelectorAll('.dot').forEach(dot => dot.remove());
             }
-            generatingText.textContent += e.data;
+            renderRichMessage(generatingText, (generatingText.dataset.rawMarkdown || '') + e.data);
         };
         es.onerror = e => {
             console.error('An error occurred', e);
@@ -177,6 +238,7 @@
     editInput{{msg.id}} = document.getElementById('editInput{{msg.id}}');
     responseDiv{{msg.id}} = document.getElementById('responseDiv{{msg.id}}');
 
+    if (editBtn{{msg.id}} && editInput{{msg.id}} && contentP{{msg.id}} && responseDiv{{msg.id}}) {
     editBtn{{msg.id}}.addEventListener('click', () => {
 
       if (editInput{{msg.id}}.style.display === 'none') {
@@ -191,14 +253,12 @@
         responseDiv{{msg.id}}.style.width =  'auto';
       }
     });
+    }
 </script>
 {% endfor %}
 <script>
-    document.querySelectorAll('p').forEach(el => {
-        el.innerHTML = el.innerHTML.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    });
-    document.querySelectorAll('p').forEach(el => {
-        el.innerHTML = el.innerHTML.replace(/\```(.*?)\```/g, '<div style="font-family: Arial; background-color:#e6d8ff; margin-top:6px; margin-bottom:6px; color:#2b1940; padding:5px; border-radius:5px;">$1</div>');
+    document.querySelectorAll('[data-rich-message]').forEach(el => {
+        renderRichMessage(el, el.textContent);
     });
     window.addEventListener('load', (event) => {
       window.scrollTo(0, document.body.scrollHeight);

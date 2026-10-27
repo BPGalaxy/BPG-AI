@@ -69,8 +69,9 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
                 "messages": [
                     {"role": "system", "content": SystemInstructions},
                     {"role": "system", "content": f"chat summary:\n {chatsummary}"},
-                    {"role": "system", "content": f"messages: \n{convrestation}~\n"},
-                    {"role": "user", "content": user_message + "- Your responses don't have to exceed 100 words.\n"},
+                    *convrestation,
+                    {"role": "user", "content": f"{user_message}" +  "\n- Your responses don't have to exceed 100 words.\n"
+                                                    '- never include "ai message:" at the start of your response.'},
                 ],
                 "stream": True,
             }
@@ -115,11 +116,9 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
                 data=json.dumps({
                     "model": model,
                     "messages": [
-                        {"role": "system", "content": SystemInstructions},
-                        {"role": "system", "content": f"chat summary:\n {chatsummary}"},
-                        {"role": "system", "content": f"messages: \n{convrestation}~\n"},
-                        {"role": "user", "content": '\nLast user message: ' + user_message + "- Your responses don't have to exceed 100 words.\n"
-                                                     '- never include "ai message:" at the start of your response.'}
+                        {"role": "system", "content": f"{SystemInstructions}\n\nChat summary:\n{chatsummary}"},
+                        *convrestation,
+                        {"role": "user", "content": f"{user_message}"}
                     ],
                     "temperature": 0.9,
                     "reasoning": {"enabled": True},
@@ -651,21 +650,21 @@ def handle_text(request):
             return redirect(f"/chats/?chat_id={chat_id}")
 
         conversationList = []
-        conversation = "" 
+        finalList = []
 
         settings = Settings.objects.get(id=1)
         memoryLimit = settings.memoryLimit
         updateSummary = settings.updateSummary
         if messages.count() > memoryLimit:
             for message in messages:
-                conversationList.append(f"{message.senderuser}: {message.text}")
+                conversationList.append({"role": "user" if message.senderuser == "user message" else "assistant", "content": f"{message.text}"})
             conversationList.reverse()
             for i in range(memoryLimit - 1):
                 if i == memoryLimit - 1:
                     break
                 else:
                     pass
-                    conversation += f"{conversationList[memoryLimit - 2 - i]}\n"
+                    finalList.append(conversationList[memoryLimit - 2 - i])
             if (messages.count() - 1) % updateSummary == 0 or messages.count() % updateSummary == 0 and messages.count() != 0:
                 if Chats.objects.get(chatid=chat_id).summary == '':
                     tempconv = ''
@@ -682,7 +681,7 @@ def handle_text(request):
                     chatsummary = Chats.objects.get(chatid=chat_id).summary
 
                     for message in messages:
-                        conversationList.append(f"{message.senderuser}: {message.text}")
+                        conversationList.append({"role": "user" if message.senderuser == "user message" else "assistant", "content": f"{message.text}"})
                     conversationList.reverse()
                     for i in range(memoryLimit - 1):
                         if i == memoryLimit - 1:
@@ -715,7 +714,7 @@ def handle_text(request):
         else:
             chatsummary = "Not available"
             for message in messages:
-                conversation += f"{message.senderuser}: {message.text}\n"
+                finalList.append({"role": "user" if message.senderuser == "user message" else "assistant", "content": f"{message.text}"})
             Message.objects.create(accountid=request.user, chatid=chat_id, text=user_input, senderuser="user message")
             Message.objects.create(accountid=request.user, chatid=chat_id, text="Generating", senderuser="ai message")
             target_chat = Chats.objects.get(chatid=chat_id)
@@ -746,7 +745,7 @@ def handle_text(request):
         current_AI = Settings.objects.get(id=1).current_AI
         threading.Thread(
             target=generate_reply_in_background,
-            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, conversation, user_input, current_AI),
+            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, finalList, user_input, current_AI),
             daemon=True,
         ).start()
 
@@ -940,6 +939,7 @@ def copy_message(request):
     ms.info(request, "Message copied")
     return redirect(f"/chats/?chat_id={chat_id}")
 
+@normal_user_check
 def edit_message(request):
     if not request.user.is_authenticated:
         ms.error(request, "Not logged in")
@@ -970,8 +970,9 @@ def edit_message(request):
     AI_Prompt = Chats.objects.get(chatid=chat_id).AI_Prompt
     AI_Name = Chats.objects.get(chatid=chat_id).AI_Name
     is_rp = Chats.objects.get(chatid=chat_id).is_rp
+    
     conversationList = []
-    conversation = ""
+    finalList = []
     memoryLimit = Settings.objects.get(id=1).memoryLimit
 
     CustomInstructions = Customization.objects.get(accountid=request.user).CustomInstructions
@@ -1014,16 +1015,16 @@ def edit_message(request):
     elif ai_or_user == "user":
         if messages.count() > memoryLimit:
             for message in messages[:len(messages) - 2]:
-                conversationList.append(f"{message.senderuser}: {message.text}")
+                conversationList.append({"role": "user" if message.senderuser == "user message" else "assistant", "content": f"{message.text}"})
             conversationList.reverse()
             for i in range(memoryLimit - 1):
                 if i == memoryLimit - 1:
                     break
                 else:
-                    conversation += f"{conversationList[memoryLimit - 2 - i]}\n"
+                    finalList.append(conversationList[memoryLimit - 2 - i])
         else:
             for message in messages[:len(messages) - 2]:
-                conversation += f"{message.senderuser}:,{message.text}\n"
+                finalList.append({"role": "user" if message.senderuser == "user message" else "assistant", "content": f"{message.text}"})
 
         chatsummary = Chats.objects.get(chatid=chat_id).summary
 
@@ -1039,37 +1040,11 @@ def edit_message(request):
         current_AI = Settings.objects.get(id=1).current_AI
         threading.Thread(
             target=generate_reply_in_background,
-            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, conversation, user_input, current_AI),
+            args=(request.user.username, request.user.pk, chat_id, Message.objects.filter(accountid=request.user, chatid=chat_id, senderuser="ai message").last().id, systemInstructions, chatsummary, finalList, user_input, current_AI),
             daemon=True,
         ).start()
-
+        
         return redirect(f"/chats/?chat_id={chat_id}")
-
-@admin_user_check
-def announcement_save(request):
-    settings = Settings.objects.first()
-    announcement_version = request.POST.get("announcement_version", "None")
-    announcement_text = request.POST.get("announcement_text", "None")
-
-    settings.ANNOUNCEMENT_VERSION = announcement_version
-    settings.ANNOUNCEMENT_TEXT = announcement_text
-    settings.save()
-
-    ms.success(request, "Announcement updated successfully")
-    return redirect("homepage")
-
-@normal_user_check
-def memory_update(request):
-    chat_id = request.POST.get("chat_id_memory", "None")
-    if chat_id == "None":
-        return render(request, "404.html")
-    MemoryInput = request.POST.get("MemoryInput", "None")
-    account_id = request.user
-    target_chat = Chats.objects.get(accountid=account_id, chatid=chat_id)
-    target_chat.summary = MemoryInput
-    target_chat.save()
-    ms.success(request, "Chat memory updated successfully")
-    return redirect(f"/chats/?chat_id={chat_id}")
 
 @normal_user_check
 def rename_chat(request):
@@ -1093,6 +1068,23 @@ def rename_chat(request):
     target_chat.save()
     ms.success(request, "Chat renamed successfully")
 
+    return redirect(f"/chats/?chat_id={chat_id}")
+
+@normal_user_check
+def memory_update(request):
+    print(request.POST)
+    if request.method == "GET":
+        return render(request, "404.html")
+    
+    chat_id = request.POST.get("chat_id_memory", "None")
+    if chat_id == "None":
+        return render(request, "404.html")
+    
+    memory_update = request.POST.get("MemoryInput", "None")
+    target_chat = Chats.objects.get(chatid=chat_id)
+    target_chat.summary = memory_update
+    target_chat.save()
+    ms.success(request, "Memory updated successfully")
     return redirect(f"/chats/?chat_id={chat_id}")
 
 @normal_user_check

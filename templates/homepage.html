@@ -82,24 +82,6 @@
         {% if user_status.is_staff %}
             <span class="pill badge-staff" onclick="showModal('staff')" style="margin-bottom: 4px;">Staff</span>
         {% endif %}
-        {% if user_status.is_owner or user_status.is_developer or user_status.is_staff %}
-          <p class="modal-text">
-            <input class="modal-close" id="AnnouncementBtn" type="button" value="Announcement settings" style="width:225px; background: #1a0a2e;color: #b388ff;border-color: #7c4dff60;animation: owner-pulse 3s ease-in-out infinite;"/>
-          </p>
-          <div style="margin-top:-10px;"></div>
-            <div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="AnnouncementMenu">
-              <h2 style="margin: 0 0 10px; font-size: 18px; color: var(--clr-lavender-header);">Announcement Settings</h2>
-              <p style="font-size: 13px; color: var(--clr-purple-muted); margin: 0 0 12px;">Set the announcement version and text to display to users.</p>
-              <form action="{% url 'announcement_save' %}" method="POST">
-                  {% csrf_token %}
-                  <button class="messagebox-close-btn" id="announcement-close-btn" type="button">&times;</button>
-                  <input type="text" name="announcement_version" placeholder="Announcement Version" id="AnnouncementVersionInput" autocomplete="off" autocapitalize="off" value="{{ announcement_version }}"/><br><br>
-                  <textarea name="announcement_text" cols="40" rows="4" placeholder="Announcement Text" class="textarea-form" id="AnnouncementTextInput">{{ announcement_text }}</textarea><br>
-                  <input type="submit" value="Save"/>
-              </form>
-            </div>
-          </div>
-        {% endif %}
 
         {% if show_announcement %}
           <div class="overlay open" id="Aoverlay" onclick="AhandleOverlayClick(event)">
@@ -193,42 +175,4 @@
                   </div>
                 </div>
                 <div style="margin:75px auto 0px auto;"></div>
-{% endblock %}
-{% block script %}
-    const AnnouncementBtn = document.getElementById("AnnouncementBtn");
-    const AnnouncementMenu = document.getElementById("AnnouncementMenu");
-    const AnnouncementCloseBtn = document.getElementById("announcement-close-btn");
-
-    const AnnouncementVersion = document.getElementById("AnnouncementVersionInput");
-    const AnnouncementText = document.getElementById("AnnouncementTextInput");
-
-    const announcementData = {
-      AnnouncementVersion: "{{ announcement_version|escapejs }}",
-      AnnouncementText: "{{ announcement_text|escapejs }}"
-    };
-
-    function closeAllMenus() {
-      AnnouncementMenu && AnnouncementMenu.classList.remove("open");
-    }
-
-    if (AnnouncementBtn && AnnouncementMenu) {
-      AnnouncementBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const isOpen = AnnouncementMenu.classList.contains("open");
-        closeAllMenus();
-        if (!isOpen) {
-          AnnouncementMenu.classList.add("open");
-          const _decode = html => { const t = document.createElement('textarea'); t.innerHTML = html; return t.value; };
-          AnnouncementVersion && (AnnouncementVersion.value = _decode(announcementData.AnnouncementVersion));
-          AnnouncementText && (AnnouncementText.value = _decode(announcementData.AnnouncementText));
-        }
-      });
-    }
-
-    if (AnnouncementCloseBtn) {
-      AnnouncementCloseBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        AnnouncementMenu && AnnouncementMenu.classList.remove("open");
-      });
-    }
 {% endblock %}

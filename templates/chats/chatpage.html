@@ -78,7 +78,7 @@
         {% csrf_token %}
       <h2>AI Memory</h2>
       <input type="hidden" id="chat_id_memory" name="chat_id_memory" value="{{ chat_id }}">
-      <textarea class="textarea-form" placeholder="AI memory would update as you keep chatting" id="MemoryInput" name="MemoryInput" required autocomplete="off" autocapitalize="off">{{chat.summary}}</textarea><br>
+      <textarea class="textarea-form" placeholder="AI memory would update as you keep chatting" id="MemoryInput" name="MemoryInput" autocomplete="off" autocapitalize="off">{{chat.summary}}</textarea><br>
       <input type="submit" value="Done"/>
     </form>
 </div>
