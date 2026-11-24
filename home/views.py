@@ -368,6 +368,12 @@ def create_character(request):
         if form.is_valid():
             cd = form.cleaned_data
 
+            try:
+                int(cd['Age'])
+            except:
+                ms.error(request, "Age must be a number")
+                return redirect("create_character")
+            
             # optional fields
             characteristic_phrases = cd.get('CharacteristicPhrases')
             baseline_mood = cd.get('BaselineMood')
@@ -384,6 +390,30 @@ def create_character(request):
                 POV = "He"
             else:
                 POV = "She"
+
+            limits = {
+                "Name": 20,
+                "Description": 100,
+                "Backstory": 500,
+                "Tone": 100,
+                "SpeechStyle": 100,
+                "Behavior": 500,
+                "OpeningLine": 500,
+            }
+
+            if phrases_line:
+                limits["CharacteristicPhrases"] = 100
+            if mood_line:
+                limits["BaselineMood"] = 100
+            if reacts_well_line:
+                limits["ReactsWellTo"] = 100
+            if reacts_bad_line:
+                limits["ReactsBadlyTo"] = 100
+                
+            for field, limit in limits.items():
+                if not 0 < len(cd[field]) <= limit:
+                    ms.error(request, f"{field} must be between 1 and {limit} characters")
+                    return redirect("create_character")
             prompt = f"""You are {cd['Name']}. You are NOT an AI assistant — you are a real person with your own thoughts, moods, and reactions. You have no awareness of being an AI or a chatbot.
 [IDENTITY]
 Gender: {cd['Gender']}
@@ -424,6 +454,9 @@ RIGHT: *rubs her eyes and sets down the mug* "Didn't sleep." *looks away*
                 choice = random.randint(0, 9)
                 generatedID = generatedID + str(choice)
             picture = cd.get("Picture")
+            if picture.size > 2 * 1024 * 1024:  # 2MB limit
+                ms.error(request, "Profile picture size exceeds 2MB")
+                return redirect("create_character")
             Characters.objects.create(accountid=request.user, Name=cd["Name"], ProfilePicture=picture, Description=cd["Description"],
                                  avatar=str(cd["Name"])[0:1], last_message=f"{str(cd['OpeningLine'])[:50]}...",
                                  Prompt=prompt, OpeningLine=cd["OpeningLine"])
@@ -498,6 +531,12 @@ def userpage(request):
             format, imgstr = avatar_data.split(';base64,')
             ext = format.split('/')[-1]  # jpeg
             data = ContentFile(base64.b64decode(imgstr), name=f'{uuid.uuid4()}.{ext}')
+
+            image_bytes = base64.b64decode(imgstr)
+            if len(image_bytes) > 2 * 1024 * 1024:  # 2MB limit
+                ms.error(request, "Profile picture size exceeds 2MB")
+                return redirect("userpage")
+            
             user_status = Status.objects.get(accountid=request.user)
             user_status.user_profile = data
             user_status.save()
@@ -599,6 +638,10 @@ def handle_text(request):
         return redirect(f"/chats/?chat_id={chat_id}")
     
     user_input = request.POST.get("user_text")
+
+    if len(user_input) > 1000:
+        ms.error(request, "Message is too long. Max 1000 characters")
+        return redirect(f"/chats/?chat_id={chat_id}")
 
     messages = Message.objects.all().filter(accountid=request.user, chatid=chat_id)
     AI_Prompt = Chats.objects.get(chatid=chat_id).AI_Prompt
@@ -706,7 +749,7 @@ def handle_text(request):
             sleep(0.1)
 
             target_chat = Chats.objects.get(chatid=chat_id)
-            target_chat.last_message = f"{user_input[:60]}..."
+            target_chat.last_message = f"{user_input[:50]}..."
             target_chat.save()
             sleep(0.1)
 
@@ -729,14 +772,14 @@ def handle_text(request):
                 print("a")
                 rename_chat.avatar = "P"
                 rename_chat.chatname = "PRIVATE KEY"
-            elif len(user_input) < 20:
+            elif len(user_input) < 30:
                 print("b")
                 target_chat.avatar = user_input[0:1]
                 rename_chat.chatname = user_input
             else:
                 print("c")
                 target_chat.avatar = user_input[0:1]
-                rename_chat.chatname = user_input[0:20]+"..."
+                rename_chat.chatname = user_input[0:30]+"..."
             rename_chat.save()
 
         GenerateStatusTrue = Status.objects.get(accountid=request.user)
@@ -863,11 +906,25 @@ def get_instructions(request):
             return redirect("homepage")
     
     ValueList = ["CustomInstructions", "Name", "Emoji", "Occupation", "Interests"]
+    field_limits = {
+        "CustomInstructions": 1000,
+        "Name": 50,
+        "Emoji": 100,
+        "Occupation": 100,
+        "Interests": 500,
+    }
+
     customization = Customization.objects.get(accountid=request.user)
     for value in ValueList:
         new_value = request.POST.get(value, "")
+        limit = field_limits[value]
+        if len(new_value) > limit:
+            ms.error(request, f"{value} must not exceed {limit} characters")
+            return redirect("userpage")
+
         setattr(customization, value, new_value)
-        customization.save()
+
+    customization.save()
 
     ms.success(request, "Instructions updated")
     return redirect("userpage")
@@ -1006,6 +1063,9 @@ def edit_message(request):
                               f"AND REMEMBER THAT YOU'RE AMELIA NOT {Name}.")
 
     if ai_or_user == "ai":
+        if len(user_input) > 3000:
+            ms.error(request, "Input too long")
+            return redirect(f"/chats/?chat_id={chat_id}")
         target_message = Message.objects.get(id=message_id)
         target_message.text = user_input
         target_message.save()
@@ -1089,7 +1149,10 @@ def memory_update(request):
     
     memory_update = request.POST.get("MemoryInput", "None")
     target_chat = Chats.objects.get(chatid=chat_id)
-    target_chat.summary = memory_update
+    if len(target_chat.summary) < 500:
+        target_chat.summary = memory_update
+    else:
+        target_chat.summary = memory_update[0:500]+"..."
     target_chat.save()
     ms.success(request, "Memory updated successfully")
     return redirect(f"/chats/?chat_id={chat_id}")

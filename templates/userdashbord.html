@@ -534,7 +534,7 @@ cropArea.addEventListener('wheel', e => {
 }, { passive: false });
 
 saveBtn.addEventListener('click', () => {
-  canvas.width = 200; canvas.height = 200;
+  canvas.width = 1024; canvas.height = 1024;
   const ctx = canvas.getContext('2d');
 
   // Convert screen offset back to source image coordinates
@@ -542,7 +542,7 @@ saveBtn.addEventListener('click', () => {
   const sy = -offsetY / scale;
   const sSize = AREA / scale; // how many source pixels fit in the crop area
 
-  ctx.drawImage(cropImg, sx, sy, sSize, sSize, 0, 0, 200, 200);
+  ctx.drawImage(cropImg, sx, sy, sSize, sSize, 0, 0, 1024, 1024);
 
   const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
