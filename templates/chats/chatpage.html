@@ -19,7 +19,9 @@
                         {{ chat_name }}
                     </div>
                     <button class="dropdown-item" type="submit" id="MemoryBtn">AI Memory</button>
-                    <button class="dropdown-item" type="submit" id="RenameBtn">Rename Chat</button>
+                    {% if not chat.is_rp %}
+                        <button class="dropdown-item" type="submit" id="RenameBtn">Rename Chat</button>
+                    {% endif %}
                     <button class="dropdown-item danger" type="submit" id="DeleteBtn">Delete Chat</button>
                     <form action="{% url 'chats' %}" method="GET" style="margin: 0;">
                         <button class="dropdown-item" type="submit">Back To Chats</button>
@@ -61,16 +63,19 @@
                   </div>
                 </form>
 {% endif %}
-<div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="RenameMenu">
-    <button class="messagebox-close-btn" id="rename-close-btn">&times;</button>
-    <form action="{% url 'rename_chat' %}" method="POST" style="margin: 0;">
-        {% csrf_token %}
-      <h2>Rename Chat</h2>
-      <input type="hidden" id="chat_id_rename" name="chat_id_rename" value="{{ chat_id }}">
-      <input type="text" placeholder="Enter new chat name" id="RenameInput" name="RenameInput" value="{{chat.chatname}}" required autocomplete="off" autocapitalize="off"/><br>
-      <input type="submit" value="Done"/>
-    </form>
-</div>
+
+{% if not chat.is_rp %}
+    <div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="RenameMenu">
+        <button class="messagebox-close-btn" id="rename-close-btn">&times;</button>
+            <form action="{% url 'rename_chat' %}" method="POST" style="margin: 0;">
+                {% csrf_token %}
+            <h2>Rename Chat</h2>
+            <input type="hidden" id="chat_id_rename" name="chat_id_rename" value="{{ chat_id }}">
+            <input type="text" placeholder="Enter new chat name" id="RenameInput" name="RenameInput" value="{{chat.chatname}}" required autocomplete="off" autocapitalize="off"/><br>
+            <input type="submit" value="Done"/>
+            </form>
+    </div>
+{% endif %}
 
 <div class="messagebox-div" style="text-align:center; border-radius: 20px; z-index:1000102;" id="MemoryMenu">
     <button class="messagebox-close-btn" id="memory-close-btn">&times;</button>

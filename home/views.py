@@ -120,7 +120,8 @@ def generate_reply_in_background(accountid, user_pk, chat_id, generating_message
                         *convrestation,
                         {"role": "user", "content": f"{user_message}"}
                     ],
-                    "temperature": 0.9,
+                    "temperature": 0.8,
+                    "top_p": 0.95,
                     "reasoning": {"enabled": True},
                 }),
             )
@@ -616,7 +617,7 @@ def handle_text(request):
     InterestsLine = f"{Name}'s interests: {Interests}\n. These are what the user ({Name}) is interested to." if Interests else ""
     if is_rp:
         rp_system_prompt = Settings.objects.get(id=1).rp_system_prompt
-        systemInstructions = (f"{AI_Prompt}\n"+rp_system_prompt)
+        systemInstructions = (f"{rp_system_prompt}\n\n{AI_Prompt}")
     else:
         nonrp_system_prompt = Settings.objects.get(id=1).nonrp_system_prompt
         systemInstructions = (nonrp_system_prompt+
@@ -1054,6 +1055,12 @@ def rename_chat(request):
     RenameInput = request.POST.get("RenameInput", "None")
     account_id = request.user
     target_chat = Chats.objects.get(accountid=account_id, chatid=chat_id)
+    if target_chat.is_deleted:
+        ms.error(request, "Forbidden")
+        return redirect(f"/chats/?chat_id={chat_id}")
+    if target_chat.AI_Prompt != "":
+        ms.error(request, "You can't rename a character chat name")
+        return redirect(f"/chats/?chat_id={chat_id}")
     chat_name = Chats.objects.get(accountid=account_id, chatid=chat_id).chatname
     if chat_name == "New Chat":
         ms.error(request, "You can't rename a just created chat")
@@ -1108,7 +1115,7 @@ def delete_chat(request):
 
 @normal_user_check
 def user_characters(request):
-    characters = Characters.objects.all().filter(accountid=request.user)
+    characters = Characters.objects.filter(accountid=request.user).order_by('-id')
     checkDeletedList = []
 
     for character in characters:
